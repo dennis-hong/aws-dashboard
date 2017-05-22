@@ -23,3 +23,6 @@ ADD_ANGULAR_MODULES = [
 ]
 
 AUTO_DISCOVER_STATIC_FILES = True
+
+# If set to True, this dashboard will not be added to the settings.
+DISABLED = False

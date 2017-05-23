@@ -16,10 +16,16 @@ from django.utils.translation import ugettext_lazy as _
 
 import horizon
 
+class ComputePanels(horizon.PanelGroup):
+    slug = "compute"
+    name = _("Compute")
+    panels = ("ec2",)
 
 class Aws(horizon.Dashboard):
     name = _("AWS")
     slug = "aws"
+    panels = (ComputePanels,)
+    default_panel = "ec2"
 
     def can_access(self, context):
         request = context['request']

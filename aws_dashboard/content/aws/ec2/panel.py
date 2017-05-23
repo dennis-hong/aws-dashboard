@@ -15,12 +15,11 @@
 from django.utils.translation import ugettext_lazy as _
 
 import horizon
+from aws_dashboard.dashboard import Aws
 
-from openstack_dashboard.dashboards.admin import dashboard
 
+class Ec2(horizon.Panel):
+    name = _("EC2")
+    slug = "ec2"
 
-class Aws(horizon.Panel):
-    name = _("AWS EC2")
-    slug = 'ec2'
-
-dashboard.Admin.register(Aws)
+Aws.register(Ec2)

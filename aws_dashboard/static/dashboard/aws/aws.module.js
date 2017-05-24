@@ -33,7 +33,7 @@
 
   function config($provide, $windowProvider) {
 
-    var path = $windowProvider.$get().STATIC_URL + 'dashboard/admin/aws/';
+    var path = $windowProvider.$get().STATIC_URL + 'dashboard/aws/';
     $provide.constant('horizon.dashboard.aws.basePath', path);
 
   }

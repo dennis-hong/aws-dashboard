@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# The slug of the dashboard to be added to HORIZON['dashboards']. Required.
-DASHBOARD = 'aws'
-
-# A list of applications to be added to INSTALLED_APPS.
-ADD_INSTALLED_APPS = ['aws_dashboard', ]
-
-ADD_ANGULAR_MODULES = [
-    'horizon.dashboard.aws',
-]
-
-AUTO_DISCOVER_STATIC_FILES = True
-
-# If set to True, this dashboard will not be added to the settings.
-DISABLED = False
+AWS_API_KEY_DICT = {
+    "b109203afb2e4f6a8ccf83cdae8ecafe": {
+        "AWS_ACCESS_KEY_ID": "",
+        "AWS_SECRET_ACCESS_KEY": "",
+        "AWS_REGION_NAME": "ap-northeast-2"
+    },
+    "41da775516234db189e7d0dd8c3da6fe": {
+        "AWS_ACCESS_KEY_ID": "",
+        "AWS_SECRET_ACCESS_KEY": "",
+        "AWS_REGION_NAME": ""
+    },
+}

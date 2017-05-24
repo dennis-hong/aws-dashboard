@@ -1,23 +1,15 @@
 {% extends 'base.html' %}
 {% load i18n %}
-{% block title %}{% trans "aws" %}{% endblock %}
+{% block title %}{% trans "EC2 Instances" %}{% endblock %}
 
 {% block breadcrumb_nav %}
   <ol class="breadcrumb">
     <li>{% trans "AWS" %}</li>
+    <li>{% trans "Compute" %}</li>
     <li class="active">{% trans "EC2" %}</li>
   </ol>
 {% endblock %}
 
-{% block page_header %}
-  {% include "horizon/common/_page_header.html" with title="EC2 Instances" %}
-{% endblock page_header %}
-
 {% block main %}
-  <iframe src="http://www.daum.net" width="100%" height="1000px">
-  </iframe>
-
-  <ng-include
-    src="'{{ STATIC_URL }}dashboard/aws/ec2/ec2.html'">
-  </ng-include>
+  {{ table.render }}
 {% endblock %}

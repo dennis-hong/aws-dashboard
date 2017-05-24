@@ -14,8 +14,11 @@
 
 from django.conf.urls import url
 
-from aws_ui.content.aws.ec2 import views
+from aws_dashboard.content.aws.ec2 import views
+
+
+INSTANCES = r'^(?P<instance_id>[^/]+)/%s$'
 
 urlpatterns = [
-    url(r'^$', views.IndexView.as_view(), name='index')
+    url(r'^$', views.IndexView.as_view(), name='index'),
 ]

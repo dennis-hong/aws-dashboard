@@ -1,4 +1,4 @@
-# Copyright 2017 dennis.hong corp.
+# Copyright 2017, dennis.hong.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,3 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+# The slug of the dashboard to be added to HORIZON['dashboards']. Required.
+DASHBOARD = 'aws'
+
+# A list of applications to be added to INSTALLED_APPS.
+ADD_INSTALLED_APPS = ['aws_dashboard', ]
+
+ADD_ANGULAR_MODULES = [
+    'horizon.dashboard.aws',
+]
+
+AUTO_DISCOVER_STATIC_FILES = True

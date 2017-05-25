@@ -2,7 +2,8 @@
 AWS Plugin For Openstack Horizon
 =========
 AWS Plugin For Openstack Horizon On Developing...
-![image](https://cloud.githubusercontent.com/assets/23111859/26439340/af7acc86-4162-11e7-89de-48ef89451987.png)
+
+.. image:: https://cloud.githubusercontent.com/assets/23111859/26439340/af7acc86-4162-11e7-89de-48ef89451987.png
 
 HOW TO USE
 -------------------------

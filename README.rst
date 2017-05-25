@@ -6,7 +6,7 @@ AWS Plugin For Openstack Horizon On Developing...
 HOW TO USE
 -------------------------
 
-1. Clone the Stater Kit repository::
+1. Clone this repository::
 
     git clone https://github.com/dennis-hong/aws-dashboard.git
 

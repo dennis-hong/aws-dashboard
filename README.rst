@@ -14,8 +14,8 @@ HOW TO USE
    ``horizon/openstack_dashboard/local/enabled`` directory. Example::
 
     cd aws-dashboard
-    cp ./aws-dashboard/local/enabled/_3*.py ../horizon/openstack_dashboard/local/enabled/
-    cp ./aws-dashboard/local/local_settings.d/_30000_aws_dashboard.py ../horizon/openstack_dashboard/local/local_settings.d/
+    cp ./aws_dashboard/local/enabled/_3*.py ../horizon/openstack_dashboard/local/enabled/
+    cp ./aws_dashboard/local/local_settings.d/_30000_aws_dashboard.py ../horizon/openstack_dashboard/local/local_settings.d/
 
 3. pip install plugin::
 

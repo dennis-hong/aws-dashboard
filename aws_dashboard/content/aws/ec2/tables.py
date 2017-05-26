@@ -14,6 +14,7 @@
 
 
 import logging
+from dateutil import parser
 
 from django.conf import settings
 from django.core import urlresolvers
@@ -27,12 +28,11 @@ from django.utils.translation import pgettext_lazy
 from django.utils.translation import string_concat  # noqa
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ungettext_lazy
-import six
 
-from horizon import conf
 from horizon import exceptions
 from horizon import messages
 from horizon import tables
+from horizon.utils import filters
 
 from openstack_dashboard import api
 from openstack_dashboard.dashboards.project.access_and_security.floating_ips \
@@ -887,23 +887,10 @@ class DetachVolume(AttachVolume):
 
 
 def get_ips(instance):
-    template_name = 'project/instances/_instance_ips.html'
-    ip_groups = {}
-
-    for ip_group, addresses in six.iteritems(instance.addresses):
-        ip_groups[ip_group] = {}
-        ip_groups[ip_group]["floating"] = []
-        ip_groups[ip_group]["non_floating"] = []
-
-        for address in addresses:
-            if ('OS-EXT-IPS:type' in address and
-               address['OS-EXT-IPS:type'] == "floating"):
-                ip_groups[ip_group]["floating"].append(address)
-            else:
-                ip_groups[ip_group]["non_floating"].append(address)
-
+    template_name = 'aws/ec2/_instance_ips.html'
     context = {
-        "ip_groups": ip_groups,
+        "publicDnsName": getattr(instance, "PublicDnsName"),
+        "publicIpAddress": getattr(instance, "PublicIpAddress")
     }
     return template.loader.render_to_string(template_name, context)
 
@@ -918,6 +905,11 @@ def get_state(instance):
 
 def get_az(instance):
     return getattr(instance, "Placement").get("AvailabilityZone")
+
+
+def get_launch_time(instance):
+    datetime = getattr(instance, "LaunchTime")
+    return datetime.isoformat()
 
 
 TASK_DISPLAY_NONE = pgettext_lazy("Task status of an Instance", u"None")
@@ -962,8 +954,8 @@ class Ec2InstanceTable(tables.DataTable):
                                  verbose_name=_("Instance Name"))
     image_name = tables.Column("ImageId",
                                verbose_name=_("Image ID"))
-    ip = tables.Column("PublicIpAddress",
-                       verbose_name=_("Public IP"),
+    ip = tables.Column(get_ips,
+                       verbose_name=_("Public Address"),
                        attrs={'data-type': "ip"})
     size = tables.Column("InstanceType", sortable=False, verbose_name=_("Size"))
     keypair = tables.Column("KeyName", verbose_name=_("Key Pair"))
@@ -975,6 +967,11 @@ class Ec2InstanceTable(tables.DataTable):
                            filters=(title, ),
                            status=True,
                            status_choices=STATUS_CHOICES)
+    created = tables.Column(get_launch_time,
+                            verbose_name=_("Time since created"),
+                            filters=(filters.parse_isotime,
+                                     filters.timesince_sortable),
+                            attrs={'data-type': 'timesince'})
 
     class Meta(object):
         name = "EC2"

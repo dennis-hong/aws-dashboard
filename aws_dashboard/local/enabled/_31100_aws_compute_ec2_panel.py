@@ -22,8 +22,3 @@ PANEL_GROUP = 'compute'
 
 # Python panel class of the PANEL to be added.
 ADD_PANEL = 'aws_dashboard.content.aws.ec2.panel.Ec2'
-
-# A list of js files to be included in the compressed set of files
-ADD_JS_FILES = []
-# A list of scss files to be included in the compressed set of files
-ADD_SCSS_FILES = ['dashboard/aws/ec2/ec2.scss']

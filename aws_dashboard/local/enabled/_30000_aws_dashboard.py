@@ -23,3 +23,7 @@ ADD_ANGULAR_MODULES = [
 ]
 
 AUTO_DISCOVER_STATIC_FILES = True
+# A list of js files to be included in the compressed set of files
+ADD_JS_FILES = []
+# A list of scss files to be included in the compressed set of files
+ADD_SCSS_FILES = ['dashboard/aws/aws.scss']

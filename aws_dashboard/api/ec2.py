@@ -49,10 +49,8 @@ class Ec2Instance(base.APIDictWrapper):
         self.tenant_id = "tenant_id"
 
 
-@memoized
-def ec2_client(request):
-    project_id = request.user.tenant_id
 
+def _get_api_key(project_id):
     keys_dict = getattr(settings, 'AWS_API_KEY_DICT', {})
     key_set = keys_dict.get(project_id)
     if key_set is None:
@@ -72,39 +70,94 @@ def ec2_client(request):
                        region_name=region_name))
         raise ImproperlyConfigured("AWS API Key Not Found. Please Check in "
                                    "local_settings.d/_30000_aws_dashboard.py")
+    return aws_access_key_id, aws_secret_access_key, region_name
+
+
+def _to_instances(reservations):
+    instances = []
+    for reservation in reservations:
+        for ec2_instance in reservation.get('Instances'):
+            instances.append(Ec2Instance(ec2_instance))
+    return instances
+
+
+@memoized
+def ec2_client(request):
+    project_id = request.user.tenant_id
+    aws_access_key_id, aws_secret_access_key, region_name = _get_api_key(project_id)
 
     c = boto3.client(
         'ec2',
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         region_name=region_name)
+    boto3.set_stream_logger(level=logging.WARN)
     return c
+
+
+@memoized
+def ec2_resource(request):
+    project_id = request.user.tenant_id
+    aws_access_key_id, aws_secret_access_key, region_name = _get_api_key(project_id)
+
+    r = boto3.resource(
+        'ec2',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        region_name=region_name)
+    boto3.set_stream_logger(level=logging.WARN)
+    return r
 
 
 def list_instance(request):
     reservations = ec2_client(request).describe_instances().get('Reservations')
-    instances = to_instances(reservations)
+    instances = _to_instances(reservations)
     return instances
 
 
 def get_instance(request, instance_id):
     reservations = None
     try:
+        # TODO: change to use ec2_resource(request)
         reservations = ec2_client(request).describe_instances(
             InstanceIds=[instance_id, ]
         ).get('Reservations')
     except ClientError as e:
         LOG.error("Received error: %s", e, exc_info=True)
-    instances = to_instances(reservations)
+    instances = _to_instances(reservations)
     if len(instances) > 0:
         return instances[0]
     else:
         return Ec2Instance()
 
 
-def to_instances(reservations):
-    instances = []
-    for reservation in reservations:
-        for ec2_instance in reservation.get('Instances'):
-            instances.append(Ec2Instance(ec2_instance))
-    return instances
+def delete_instance(request, instance_id):
+    response = ec2_client(request).terminate_instances(
+        InstanceIds=[
+            instance_id,
+        ]
+    )
+    return response
+
+
+def create_instance(request, name, image, flavor, key_name, security_groups, instance_count):
+    instance = ec2_resource(request).create_instances(
+        ImageId=image,
+        MinCount=instance_count,
+        MaxCount=instance_count,
+        KeyName=key_name,
+        SecurityGroupIds=security_groups,
+        InstanceType=flavor,
+        TagSpecifications=[
+            {
+                'ResourceType': 'instance',
+                'Tags': [
+                    {
+                        'Key': 'Name',
+                        'Value': name
+                    },
+                ]
+            },
+        ]
+    )
+    return instance[0].id

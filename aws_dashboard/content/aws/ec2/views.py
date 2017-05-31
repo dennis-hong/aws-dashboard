@@ -16,13 +16,17 @@ Views for managing EC2 instances.
 """
 import logging
 
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import ImproperlyConfigured
+from django.conf import settings
 from horizon import tables
 from horizon import exceptions
+from horizon import workflows
 
 import tables as aws_tables
 from aws_dashboard.api.ec2 import list_instance
+from aws_dashboard.content.aws.ec2 import workflows as aws_workflows
 
 
 LOG = logging.getLogger(__name__)
@@ -43,4 +47,15 @@ class IndexView(tables.DataTableView):
             exceptions.handle(self.request, _("Unable to retrieve instances."))
         return instances
 
+
+class LaunchInstanceView(workflows.WorkflowView):
+    workflow_class = aws_workflows.LaunchInstance
+
+    def get_initial(self):
+        initial = super(LaunchInstanceView, self).get_initial()
+        initial['project_id'] = self.request.user.tenant_id
+        initial['user_id'] = self.request.user.id
+        defaults = getattr(settings, 'LAUNCH_INSTANCE_DEFAULTS', {})
+        initial['config_drive'] = defaults.get('config_drive', False)
+        return initial
 

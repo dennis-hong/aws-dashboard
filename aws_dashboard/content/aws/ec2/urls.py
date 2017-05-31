@@ -1,4 +1,4 @@
-# Copyright (c) 2017 kakao corp.
+# Copyright (c) 2017 dennis hong.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,11 +14,14 @@
 
 from django.conf.urls import url
 
+import aws_dashboard.api.ec2_rest_api  # noqa
 from aws_dashboard.content.aws.ec2 import views
 
 
 INSTANCES = r'^(?P<instance_id>[^/]+)/%s$'
+INSTANCES_KEYPAIR = r'^(?P<instance_id>[^/]+)/(?P<keypair_name>[^/]+)/%s$'
 
 urlpatterns = [
     url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^launch$', views.LaunchInstanceView.as_view(), name='launch'),
 ]

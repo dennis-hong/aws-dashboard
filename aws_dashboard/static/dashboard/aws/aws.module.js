@@ -1,5 +1,5 @@
 /*
- * © Copyright 2017 kakao corp.
+ * © Copyright 2017 dennis hong.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,26 @@
    * @ngname horizon.dashboard.aws
    *
    * @description
-   * Provides all of the services and widgets required
-   * to support and display Myplugin related content.
+   * Dashboard module to host aws panels.
    */
   angular
-    .module('horizon.dashboard.aws', [])
+    .module('horizon.dashboard.aws', [
+      'horizon.dashboard.aws.containers',
+      'horizon.dashboard.aws.workflow',
+      'horizon.dashboard.aws.aws-service-api'
+    ])
     .config(config);
 
   config.$inject = ['$provide', '$windowProvider'];
 
+    /**
+   * @name horizon.dashboard.aws.basePath
+   * @param {Object} $provide
+   * @param {Object} $windowProvider
+   * @description Base path for the aws dashboard
+   * @returns {undefined} Returns nothing
+   */
   function config($provide, $windowProvider) {
-
     var path = $windowProvider.$get().STATIC_URL + 'dashboard/aws/';
     $provide.constant('horizon.dashboard.aws.basePath', path);
 

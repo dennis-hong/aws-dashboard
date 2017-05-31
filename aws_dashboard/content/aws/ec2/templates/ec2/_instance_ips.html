@@ -1,4 +1,4 @@
 <ul>
-    <li>{{ publicDnsName }}</li>
-    <li>{{ publicIpAddress }}</li>
+    {% if publicDnsName %}<li>{{ publicDnsName }}</li>{% endif %}
+    {% if publicIpAddress %}<li>{{ publicIpAddress }}</li>{% endif %}
 </ul>

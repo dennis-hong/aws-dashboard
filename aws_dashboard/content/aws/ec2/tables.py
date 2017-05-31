@@ -44,14 +44,14 @@ from openstack_dashboard.dashboards.project.instances.workflows \
     import update_instance
 from openstack_dashboard import policy
 
-from aws_dashboard.api.ec2 import get_instance
+from aws_dashboard.api import ec2
 
 
 LOG = logging.getLogger(__name__)
 
-ACTIVE_STATES = ("ACTIVE",)
-VOLUME_ATTACH_READY_STATES = ("ACTIVE", "SHUTOFF")
-SNAPSHOT_READY_STATES = ("ACTIVE", "SHUTOFF", "PAUSED", "SUSPENDED")
+ACTIVE_STATES = ("Running",)
+VOLUME_ATTACH_READY_STATES = ("Running", "SHUTOFF")
+SNAPSHOT_READY_STATES = ("Running", "SHUTOFF", "PAUSED", "SUSPENDED")
 
 POWER_STATES = {
     0: "NO STATE",
@@ -111,7 +111,7 @@ class DeleteInstance(policy.PolicyTargetMixin, tables.DeleteAction):
         return error_state or not is_deleting(instance)
 
     def action(self, request, obj_id):
-        api.nova.server_delete(request, obj_id)
+        ec2.delete_instance(request, obj_id)
 
 
 class RebootInstance(policy.PolicyTargetMixin, tables.BatchAction):
@@ -374,7 +374,7 @@ class ToggleShelve(tables.BatchAction):
 class LaunchLink(tables.LinkAction):
     name = "launch"
     verbose_name = _("Launch Instance")
-    url = "horizon:project:instances:launch"
+    url = "horizon:aws:ec2:launch"
     classes = ("ajax-modal", "btn-launch")
     icon = "cloud-upload"
     policy_rules = (("compute", "compute:create"),)
@@ -417,7 +417,7 @@ class LaunchLink(tables.LinkAction):
 
 class LaunchLinkNG(LaunchLink):
     name = "launch-ng"
-    url = "horizon:project:instances:index"
+    url = "horizon:aws:ec2:index"
     ajax = False
     classes = ("btn-launch", )
 
@@ -728,7 +728,7 @@ class UpdateRow(tables.Row):
     ajax = True
 
     def get_data(self, request, instance_id):
-        instance = get_instance(request, instance_id)
+        instance = ec2.get_instance(request, instance_id)
         return instance
 
 
@@ -869,7 +869,7 @@ class AttachVolume(tables.LinkAction):
     # This action should be disabled if the instance
     # is not active, or the instance is being deleted
     def allowed(self, request, instance=None):
-        return instance.status in ("ACTIVE") \
+        return instance.status in ("Running") \
             and not is_deleting(instance)
 
 
@@ -882,15 +882,15 @@ class DetachVolume(AttachVolume):
     # This action should be disabled if the instance
     # is not active, or the instance is being deleted
     def allowed(self, request, instance=None):
-        return instance.status in ("ACTIVE") \
+        return instance.status in ("Running") \
             and not is_deleting(instance)
 
 
 def get_ips(instance):
     template_name = 'aws/ec2/_instance_ips.html'
     context = {
-        "publicDnsName": getattr(instance, "PublicDnsName"),
-        "publicIpAddress": getattr(instance, "PublicIpAddress")
+        "publicDnsName": getattr(instance, "PublicDnsName", ""),
+        "publicIpAddress": getattr(instance, "PublicIpAddress", "")
     }
     return template.loader.render_to_string(template_name, context)
 
@@ -900,15 +900,15 @@ def get_power_state(instance):
 
 
 def get_state(instance):
-    return getattr(instance, "State").get("Name")
+    return getattr(instance, "State", {}).get("Name")
 
 
 def get_az(instance):
-    return getattr(instance, "Placement").get("AvailabilityZone")
+    return getattr(instance, "Placement", {}).get("AvailabilityZone")
 
 
 def get_launch_time(instance):
-    datetime = getattr(instance, "LaunchTime")
+    datetime = getattr(instance, "LaunchTime", {})
     return datetime.isoformat()
 
 
@@ -929,14 +929,9 @@ POWER_DISPLAY_CHOICES = (
 
 STATUS_CHOICES = (
     ("Running", True),
-    ("active", True),
-    ("shutoff", True),
-    ("suspended", True),
-    ("paused", True),
-    ("error", False),
-    ("rescue", True),
-    ("shelved", True),
-    ("shelved_offloaded", True),
+    ("Stopped", False),
+    ("Error", False),
+    ("Terminated", False),
 )
 
 

@@ -18,13 +18,13 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceConfigurationController', LaunchInstanceConfigurationController);
+    .controller('LaunchEC2InstanceConfigurationController', LaunchEC2InstanceConfigurationController);
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceConfigurationController
+   * @name LaunchEC2InstanceConfigurationController
    * @description
-   * The `LaunchInstanceConfigurationController` controller is responsible for
+   * The `LaunchEC2InstanceConfigurationController` controller is responsible for
    * setting the following instance properties:
    *
    * @property {string} user_data, default to empty string.
@@ -33,7 +33,7 @@
    * @property {boolean} config_drive, default to false.
    * @returns {undefined} Returns nothing
    */
-  function LaunchInstanceConfigurationController() {
+  function LaunchEC2InstanceConfigurationController() {
     var ctrl = this;
 
     ctrl.MAX_SCRIPT_SIZE = MAX_SCRIPT_SIZE;

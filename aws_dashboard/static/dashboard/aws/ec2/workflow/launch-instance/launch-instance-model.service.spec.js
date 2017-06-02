@@ -18,7 +18,7 @@
 
   describe('Launch Instance Model', function() {
 
-    describe('launchInstanceModel Factory', function() {
+    describe('launchEC2InstanceModel Factory', function() {
       var model, scope, settings, $q, glance, IMAGE, VOLUME, VOLUME_SNAPSHOT, INSTANCE_SNAPSHOT;
       var cinderEnabled = false;
       var neutronEnabled = false;
@@ -320,7 +320,7 @@
       }));
 
       beforeEach(inject(function($injector) {
-        model = $injector.get('launchInstanceModel');
+        model = $injector.get('launchEC2InstanceModel');
         $q = $injector.get('$q');
         scope = $injector.get('$rootScope').$new();
         glance = $injector.get('horizon.app.core.openstack-service-api.glance');

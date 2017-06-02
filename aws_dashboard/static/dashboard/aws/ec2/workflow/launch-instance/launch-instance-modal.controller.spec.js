@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  describe('LaunchInstanceModalController tests', function() {
+  describe('LaunchEC2InstanceModalController tests', function() {
     var ctrl, modalService;
 
     beforeEach(module('horizon.dashboard.aws'));
@@ -33,22 +33,22 @@
     }));
 
     beforeEach(inject(function($controller) {
-      ctrl = $controller('LaunchInstanceModalController');
+      ctrl = $controller('LaunchEC2InstanceModalController');
     }));
 
     it('defines the controller', function() {
       expect(ctrl).toBeDefined();
     });
 
-    it('defines openLaunchInstanceWizard', function() {
-      expect(ctrl.openLaunchInstanceWizard).toBeDefined();
+    it('defines openLaunchEC2InstanceWizard', function() {
+      expect(ctrl.openLaunchEC2InstanceWizard).toBeDefined();
     });
 
-    describe('openLaunchInstanceWizard function tests', function() {
+    describe('openLaunchEC2InstanceWizard function tests', function() {
       var func, launchContext;
 
       beforeEach(function() {
-        func = ctrl.openLaunchInstanceWizard;
+        func = ctrl.openLaunchEC2InstanceWizard;
         launchContext = {};
       });
 

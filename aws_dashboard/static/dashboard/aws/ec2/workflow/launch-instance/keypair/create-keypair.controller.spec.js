@@ -63,7 +63,7 @@
     beforeEach(
       inject(
         function($controller, $rootScope) {
-          ctrl = $controller('LaunchInstanceCreateKeyPairController', {
+          ctrl = $controller('LaunchEC2InstanceCreateKeyPairController', {
             $scope: $rootScope
           });
         }

@@ -19,11 +19,11 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceKeypairController', LaunchInstanceKeypairController);
+    .controller('LaunchEC2InstanceKeypairController', LaunchEC2InstanceKeypairController);
 
-  LaunchInstanceKeypairController.$inject = [
+  LaunchEC2InstanceKeypairController.$inject = [
     'horizon.dashboard.aws.workflow.launch-instance.basePath',
-    'launchInstanceModel',
+    'launchEC2InstanceModel',
     '$modal',
     'horizon.framework.widgets.toast.service',
     'horizon.app.core.openstack-service-api.settings'
@@ -31,18 +31,18 @@
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceKeypairController
+   * @name LaunchEC2InstanceKeypairController
    * @param {string} basePath
-   * @param {Object} launchInstanceModel
+   * @param {Object} launchEC2InstanceModel
    * @param {Object} $modal
    * @param {Object} toastService
    * @description
    * Allows selection of key pairs.
    * @returns {undefined} No return value
    */
-  function LaunchInstanceKeypairController(
+  function LaunchEC2InstanceKeypairController(
     basePath,
-    launchInstanceModel,
+    launchEC2InstanceModel,
     $modal,
     toastService,
     settingsService
@@ -61,8 +61,8 @@
     ctrl.setKeypairRequired = setKeypairRequired;
 
     ctrl.tableData = {
-      available: launchInstanceModel.keypairs,
-      allocated: launchInstanceModel.newInstanceSpec.key_pair
+      available: launchEC2InstanceModel.keypairs,
+      allocated: launchEC2InstanceModel.newInstanceSpec.key_pair
     };
 
     ctrl.availableTableConfig = {
@@ -126,7 +126,7 @@
     function createKeyPair() {
       $modal.open({
         templateUrl: basePath + 'keypair/create-keypair.html',
-        controller: 'LaunchInstanceCreateKeyPairController as ctrl',
+        controller: 'LaunchEC2InstanceCreateKeyPairController as ctrl',
         windowClass: 'modal-dialog-wizard',
         resolve: {
           existingKeypairs: getKeypairs
@@ -162,7 +162,7 @@
     function importKeyPair() {
       $modal.open({
         templateUrl: basePath + 'keypair/import-keypair.html',
-        controller: 'LaunchInstanceImportKeyPairController as ctrl',
+        controller: 'LaunchEC2InstanceImportKeyPairController as ctrl',
         windowClass: 'modal-dialog-wizard'
       }).result.then(assignKeypair);
     }
@@ -172,12 +172,12 @@
       // the name as the id. Name is the key used in URLs, etc.
       keypair.id = keypair.name;
 
-      launchInstanceModel.keypairs.push(keypair);
+      launchEC2InstanceModel.keypairs.push(keypair);
       ctrl.allocateNewKeyPair(keypair);
     }
 
     function getKeypairs() {
-      return launchInstanceModel.keypairs.map(getName);
+      return launchEC2InstanceModel.keypairs.map(getName);
     }
 
     function getName(item) {

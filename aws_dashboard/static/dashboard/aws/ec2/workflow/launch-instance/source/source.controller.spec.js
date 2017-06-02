@@ -22,7 +22,7 @@
     beforeEach(module('horizon.dashboard.aws'));
     beforeEach(module('horizon.framework'));
 
-    describe('LaunchInstanceSourceController', function() {
+    describe('LaunchEC2InstanceSourceController', function() {
       var scope, ctrl, $browser, deferred, magicSearchEvents;
 
       beforeEach(module(function($provide, $injector) {
@@ -65,7 +65,7 @@
           'boot-source-type': { $setValidity: noop }
         };
 
-        ctrl = $controller('LaunchInstanceSourceController', { $scope: scope });
+        ctrl = $controller('LaunchEC2InstanceSourceController', { $scope: scope });
 
         scope.$apply();
       }));

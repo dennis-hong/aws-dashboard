@@ -18,15 +18,15 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceFlavorController', LaunchInstanceFlavorController);
+    .controller('LaunchEC2InstanceFlavorController', LaunchEC2InstanceFlavorController);
 
-  LaunchInstanceFlavorController.$inject = [
+  LaunchEC2InstanceFlavorController.$inject = [
     '$scope',
     'horizon.framework.widgets.charts.quotaChartDefaults',
-    'launchInstanceModel'
+    'launchEC2InstanceModel'
   ];
 
-  function LaunchInstanceFlavorController($scope, quotaChartDefaults, launchInstanceModel) {
+  function LaunchEC2InstanceFlavorController($scope, quotaChartDefaults, launchEC2InstanceModel) {
     var ctrl = this;
 
     ctrl.defaultIfUndefined = defaultIfUndefined;
@@ -87,7 +87,7 @@
 
     // Convenience references to launch instance model elements
     ctrl.flavors = [];
-    ctrl.metadataDefs = launchInstanceModel.metadataDefs;
+    ctrl.metadataDefs = launchEC2InstanceModel.metadataDefs;
     ctrl.novaLimits = {};
     ctrl.instanceCount = 1;
 
@@ -109,7 +109,7 @@
 
     // Flavor facades and the new instance chart depend on nova limit data
     var novaLimitsWatcher = $scope.$watch(function () {
-      return launchInstanceModel.novaLimits;
+      return launchEC2InstanceModel.novaLimits;
     }, function (newValue, oldValue, scope) {
       var ctrl = scope.selectFlavorCtrl;
       ctrl.novaLimits = newValue;
@@ -118,7 +118,7 @@
 
     // Flavor facades depend on flavors
     var flavorsWatcher = $scope.$watchCollection(function() {
-      return launchInstanceModel.flavors;
+      return launchEC2InstanceModel.flavors;
     }, function (newValue, oldValue, scope) {
       var ctrl = scope.selectFlavorCtrl;
       ctrl.flavors = newValue;
@@ -127,7 +127,7 @@
 
     // Flavor quota charts depend on the current instance count
     var instanceCountWatcher = $scope.$watch(function () {
-      return launchInstanceModel.newInstanceSpec.instance_count;
+      return launchEC2InstanceModel.newInstanceSpec.instance_count;
     }, function (newValue, oldValue, scope) {
       if (angular.isDefined(newValue)) {
         var ctrl = scope.selectFlavorCtrl;
@@ -143,16 +143,16 @@
       "selectFlavorCtrl.allocatedFlavorFacades",
       function (newValue, oldValue, scope) {
         if (newValue && newValue.length > 0) {
-          launchInstanceModel.newInstanceSpec.flavor = newValue[0].flavor;
+          launchEC2InstanceModel.newInstanceSpec.flavor = newValue[0].flavor;
           scope.selectFlavorCtrl.validateFlavor();
         } else {
-          delete launchInstanceModel.newInstanceSpec.flavor;
+          delete launchEC2InstanceModel.newInstanceSpec.flavor;
         }
       }
     );
 
     var sourceWatcher = $scope.$watchCollection(function() {
-      return launchInstanceModel.newInstanceSpec.source;
+      return launchEC2InstanceModel.newInstanceSpec.source;
     }, function (newValue, oldValue, scope) {
       var ctrl = scope.selectFlavorCtrl;
       ctrl.source = newValue && newValue.length ? newValue[0] : null;
@@ -231,8 +231,8 @@
       var instancesChartData = ctrl.getChartData(
         ctrl.chartTotalInstancesLabel,
         ctrl.instanceCount,
-        launchInstanceModel.novaLimits.totalInstancesUsed,
-        launchInstanceModel.novaLimits.maxTotalInstances);
+        launchEC2InstanceModel.novaLimits.totalInstancesUsed,
+        launchEC2InstanceModel.novaLimits.maxTotalInstances);
 
       /*
        * Each flavor has a different cpu and ram chart, create them here and
@@ -246,14 +246,14 @@
         facade.vcpusChartData = ctrl.getChartData(
           ctrl.chartTotalVcpusLabel,
           ctrl.instanceCount * facade.vcpus,
-          launchInstanceModel.novaLimits.totalCoresUsed,
-          launchInstanceModel.novaLimits.maxTotalCores);
+          launchEC2InstanceModel.novaLimits.totalCoresUsed,
+          launchEC2InstanceModel.novaLimits.maxTotalCores);
 
         facade.ramChartData = ctrl.getChartData(
           ctrl.chartTotalRamLabel,
           ctrl.instanceCount * facade.ram,
-          launchInstanceModel.novaLimits.totalRAMUsed,
-          launchInstanceModel.novaLimits.maxTotalRAMSize);
+          launchEC2InstanceModel.novaLimits.totalRAMUsed,
+          launchEC2InstanceModel.novaLimits.maxTotalRAMSize);
 
         var errors = ctrl.getErrors(facade.flavor);
         facade.errors = errors;
@@ -327,7 +327,7 @@
       }
 
       // Check source minimum requirements against this flavor
-      var sourceType = launchInstanceModel.newInstanceSpec.source_type;
+      var sourceType = launchEC2InstanceModel.newInstanceSpec.source_type;
       if (source && sourceType &&
         (sourceType.type === 'image' || sourceType.type === 'snapshot')) {
         if (source.min_disk > 0 && source.min_disk > flavor.disk) {

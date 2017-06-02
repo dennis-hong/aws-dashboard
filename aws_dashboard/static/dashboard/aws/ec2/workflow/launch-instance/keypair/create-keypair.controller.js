@@ -19,9 +19,9 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceCreateKeyPairController', LaunchInstanceCreateKeyPairController);
+    .controller('LaunchEC2InstanceCreateKeyPairController', LaunchEC2InstanceCreateKeyPairController);
 
-  LaunchInstanceCreateKeyPairController.$inject = [
+  LaunchEC2InstanceCreateKeyPairController.$inject = [
     '$modalInstance',
     'existingKeypairs',
     'horizon.app.core.openstack-service-api.nova',
@@ -31,7 +31,7 @@
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceCreateKeyPairController
+   * @name LaunchEC2InstanceCreateKeyPairController
    * @param {Object} $modalInstance
    * @param {Object} existingKeypairs
    * @param {Object} nova
@@ -41,7 +41,7 @@
    * Provide a dialog for creation of a new key pair.
    * @returns {undefined} Returns nothing
    */
-  function LaunchInstanceCreateKeyPairController($modalInstance, existingKeypairs, nova,
+  function LaunchEC2InstanceCreateKeyPairController($modalInstance, existingKeypairs, nova,
   toastService, keypairDownloadService) {
     var ctrl = this;
 

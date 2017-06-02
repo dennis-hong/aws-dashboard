@@ -14,9 +14,9 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .factory('launchInstanceModel', launchInstanceModel);
+    .factory('launchEC2InstanceModel', launchEC2InstanceModel);
 
-  launchInstanceModel.$inject = [
+  launchEC2InstanceModel.$inject = [
     '$q',
     '$log',
     'horizon.app.core.openstack-service-api.cinder',
@@ -36,7 +36,7 @@
 
   /**
    * @ngdoc service
-   * @name launchInstanceModel
+   * @name launchEC2InstanceModel
    *
    * @param {Object} $q
    * @param {Object} $log
@@ -62,7 +62,7 @@
    * UI and services API.
    * @returns {Object} The model
    */
-  function launchInstanceModel(
+  function launchEC2InstanceModel(
     $q,
     $log,
     cinderAPI,
@@ -195,7 +195,7 @@
 
     /**
      * @ngdoc method
-     * @name launchInstanceModel.initialize
+     * @name launchEC2InstanceModel.initialize
      * @returns {promise}
      *
      * @description
@@ -268,7 +268,7 @@
 
     /**
      * @ngdoc method
-     * @name launchInstanceModel.createInstance
+     * @name launchEC2InstanceModel.createInstance
      * @returns {promise}
      *
      * @description

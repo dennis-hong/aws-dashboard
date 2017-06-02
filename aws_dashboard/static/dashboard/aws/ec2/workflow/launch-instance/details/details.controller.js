@@ -19,23 +19,23 @@
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceDetailsController
+   * @name LaunchEC2InstanceDetailsController
    * @description
-   * The `LaunchInstanceDetailsController` controller provides functions for
+   * The `LaunchEC2InstanceDetailsController` controller provides functions for
    * configuring the details step of the Launch Instance Wizard.
    *
    */
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceDetailsController', LaunchInstanceDetailsController);
+    .controller('LaunchEC2InstanceDetailsController', LaunchEC2InstanceDetailsController);
 
-  LaunchInstanceDetailsController.$inject = [
+  LaunchEC2InstanceDetailsController.$inject = [
     '$scope',
     'horizon.framework.widgets.charts.donutChartSettings',
     'horizon.framework.widgets.charts.quotaChartDefaults'
   ];
 
-  function LaunchInstanceDetailsController($scope,
+  function LaunchEC2InstanceDetailsController($scope,
     donutChartSettings,
     quotaChartDefaults
   ) {

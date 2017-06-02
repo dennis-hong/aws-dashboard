@@ -423,10 +423,10 @@ class LaunchLinkNG(LaunchLink):
 
     def get_default_attrs(self):
         url = urlresolvers.reverse(self.url)
-        ngclick = "modal.openLaunchInstanceWizard(" \
+        ngclick = "modal.openLaunchEC2InstanceWizard(" \
             "{ successUrl: '%s' })" % url
         self.attrs.update({
-            'ng-controller': 'LaunchInstanceModalController as modal',
+            'ng-controller': 'LaunchEC2InstanceModalController as modal',
             'ng-click': ngclick
         })
         return super(LaunchLinkNG, self).get_default_attrs()

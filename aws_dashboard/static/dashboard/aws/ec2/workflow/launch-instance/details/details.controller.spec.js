@@ -22,7 +22,7 @@
 
     beforeEach(module('horizon.dashboard.aws'));
 
-    describe('LaunchInstanceDetailsController', function() {
+    describe('LaunchEC2InstanceDetailsController', function() {
       var scope, ctrl, deferred;
 
       beforeEach(module(function($provide) {
@@ -47,7 +47,7 @@
           }
         };
 
-        ctrl = $controller('LaunchInstanceDetailsController', { $scope: scope });
+        ctrl = $controller('LaunchEC2InstanceDetailsController', { $scope: scope });
 
         scope.$apply();
       }));

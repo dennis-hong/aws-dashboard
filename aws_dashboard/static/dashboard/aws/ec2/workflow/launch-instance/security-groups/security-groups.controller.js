@@ -16,28 +16,28 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceSecurityGroupsController', LaunchInstanceSecurityGroupsController);
+    .controller('LaunchEC2InstanceSecurityGroupsController', LaunchEC2InstanceSecurityGroupsController);
 
-  LaunchInstanceSecurityGroupsController.$inject = [
-    'launchInstanceModel',
+  LaunchEC2InstanceSecurityGroupsController.$inject = [
+    'launchEC2InstanceModel',
     'horizon.dashboard.aws.workflow.launch-instance.basePath'
   ];
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceSecurityGroupsController
-   * @param {Object} launchInstanceModel
+   * @name LaunchEC2InstanceSecurityGroupsController
+   * @param {Object} launchEC2InstanceModel
    * @param {string} basePath
    * @description
    * Allows selection of security groups.
    * @returns {undefined} No return value
    */
-  function LaunchInstanceSecurityGroupsController(launchInstanceModel, basePath) {
+  function LaunchEC2InstanceSecurityGroupsController(launchEC2InstanceModel, basePath) {
     var ctrl = this;
 
     ctrl.tableData = {
-      available: launchInstanceModel.securityGroups,
-      allocated: launchInstanceModel.newInstanceSpec.security_groups,
+      available: launchEC2InstanceModel.securityGroups,
+      allocated: launchEC2InstanceModel.newInstanceSpec.security_groups,
       displayedAvailable: [],
       displayedAllocated: []
     };

@@ -20,16 +20,16 @@
     .module('horizon.dashboard.aws.workflow.launch-instance')
     .factory(
       'horizon.dashboard.aws.workflow.launch-instance.modal.service',
-      LaunchInstanceModalService
+      LaunchEC2InstanceModalService
     );
 
-  LaunchInstanceModalService.$inject = [
+  LaunchEC2InstanceModalService.$inject = [
     '$modal',
     '$window',
     'horizon.dashboard.aws.workflow.launch-instance.modal-spec'
   ];
 
-  function LaunchInstanceModalService($modal, $window, modalSpec) {
+  function LaunchEC2InstanceModalService($modal, $window, modalSpec) {
     var service = {
       open: open
     };

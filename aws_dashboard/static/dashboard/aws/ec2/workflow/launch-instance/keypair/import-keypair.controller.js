@@ -19,9 +19,9 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceImportKeyPairController', LaunchInstanceImportKeyPairController);
+    .controller('LaunchEC2InstanceImportKeyPairController', LaunchEC2InstanceImportKeyPairController);
 
-  LaunchInstanceImportKeyPairController.$inject = [
+  LaunchEC2InstanceImportKeyPairController.$inject = [
     '$modalInstance',
     'horizon.app.core.openstack-service-api.nova',
     'horizon.framework.widgets.toast.service',
@@ -30,7 +30,7 @@
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceImportKeyPairController
+   * @name LaunchEC2InstanceImportKeyPairController
    * @param {Object} $modalInstance
    * @param {Object} novaAPI
    * @param {Object} toastService
@@ -39,7 +39,7 @@
    * Provide a dialog for import of an existing ssh public key.
    * @returns {undefined} Returns nothing
    */
-  function LaunchInstanceImportKeyPairController($modalInstance, novaAPI, toastService, basePath) {
+  function LaunchEC2InstanceImportKeyPairController($modalInstance, novaAPI, toastService, basePath) {
     var ctrl = this;
 
     ctrl.submit = submit;

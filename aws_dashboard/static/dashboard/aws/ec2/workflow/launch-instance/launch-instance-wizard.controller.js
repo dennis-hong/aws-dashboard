@@ -18,19 +18,19 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceWizardController', LaunchInstanceWizardController);
+    .controller('LaunchEC2InstanceWizardController', LaunchEC2InstanceWizardController);
 
-  LaunchInstanceWizardController.$inject = [
+  LaunchEC2InstanceWizardController.$inject = [
     '$scope',
-    'launchInstanceModel',
+    'launchEC2InstanceModel',
     'horizon.dashboard.aws.workflow.launch-instance.workflow'
   ];
 
-  function LaunchInstanceWizardController($scope, launchInstanceModel, launchInstanceWorkflow) {
+  function LaunchEC2InstanceWizardController($scope, launchEC2InstanceModel, launchInstanceWorkflow) {
     // Note: we set these attributes on the $scope so that the scope inheritance used all
     // through the launch instance wizard continues to work.
     $scope.workflow = launchInstanceWorkflow;     // eslint-disable-line angular/controller-as
-    $scope.model = launchInstanceModel;           // eslint-disable-line angular/controller-as
+    $scope.model = launchEC2InstanceModel;           // eslint-disable-line angular/controller-as
     $scope.model.initialize(true);
     $scope.submit = $scope.model.createInstance;  // eslint-disable-line angular/controller-as
   }

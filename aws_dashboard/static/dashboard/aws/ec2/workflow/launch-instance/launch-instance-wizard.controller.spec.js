@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  describe('LaunchInstanceWizardController tests', function() {
+  describe('LaunchEC2InstanceWizardController tests', function() {
     var ctrl;
     var model = {
       createInstance: function() {
@@ -29,13 +29,13 @@
     beforeEach(module('horizon.dashboard.aws'));
     beforeEach(module(function ($provide) {
       $provide.value('serviceCatalog', {});
-      $provide.value('launchInstanceModel', model);
+      $provide.value('launchEC2InstanceModel', model);
       $provide.value('horizon.dashboard.aws.workflow.launch-instance.workflow',
         { thing: true });
     }));
     beforeEach(inject(function ($controller) {
       spyOn(model, 'initialize');
-      ctrl = $controller('LaunchInstanceWizardController', {$scope: scope});
+      ctrl = $controller('LaunchEC2InstanceWizardController', {$scope: scope});
     }));
 
     it('defines the controller', function() {

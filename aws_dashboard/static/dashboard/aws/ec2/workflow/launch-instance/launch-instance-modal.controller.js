@@ -18,18 +18,18 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceModalController', LaunchInstanceModalController);
+    .controller('LaunchEC2InstanceModalController', LaunchEC2InstanceModalController);
 
-  LaunchInstanceModalController.$inject = [
+  LaunchEC2InstanceModalController.$inject = [
     'horizon.dashboard.aws.workflow.launch-instance.modal.service'
   ];
 
-  function LaunchInstanceModalController(modalService) {
+  function LaunchEC2InstanceModalController(modalService) {
     var ctrl = this;
 
-    ctrl.openLaunchInstanceWizard = openLaunchInstanceWizard;
+    ctrl.openLaunchEC2InstanceWizard = openLaunchEC2InstanceWizard;
 
-    function openLaunchInstanceWizard(launchContext) {
+    function openLaunchEC2InstanceWizard(launchContext) {
       modalService.open(launchContext);
     }
   }

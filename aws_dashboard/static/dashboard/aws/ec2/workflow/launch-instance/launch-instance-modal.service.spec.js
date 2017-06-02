@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  describe('LaunchInstanceModalService tests', function() {
+  describe('LaunchEC2InstanceModalService tests', function() {
     var service, modal, $window;
 
     beforeEach(module('horizon.dashboard.aws'));

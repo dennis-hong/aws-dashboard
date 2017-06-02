@@ -23,7 +23,7 @@
       backdrop: 'static',
       size: 'lg',
       controller: 'ModalContainerController',
-      template: '<wizard class="wizard" ng-controller="LaunchInstanceWizardController"></wizard>'
+      template: '<wizard class="wizard" ng-controller="LaunchEC2InstanceWizardController"></wizard>'
     })
 
     /**

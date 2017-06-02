@@ -18,21 +18,21 @@
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceNetworkController
+   * @name LaunchEC2InstanceNetworkController
    * @description
    * Controller for the Launch Instance - Network Step.
    */
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceNetworkController', LaunchInstanceNetworkController);
+    .controller('LaunchEC2InstanceNetworkController', LaunchEC2InstanceNetworkController);
 
-  LaunchInstanceNetworkController.$inject = [
+  LaunchEC2InstanceNetworkController.$inject = [
     '$scope',
     'horizon.framework.widgets.action-list.button-tooltip.row-warning.service',
-    'launchInstanceModel'
+    'launchEC2InstanceModel'
   ];
 
-  function LaunchInstanceNetworkController($scope, tooltipService, launchInstanceModel) {
+  function LaunchEC2InstanceNetworkController($scope, tooltipService, launchEC2InstanceModel) {
     var ctrl = this;
 
     ctrl.networkStatuses = {
@@ -105,7 +105,7 @@
     ];
 
     function getPorts() {
-      return launchInstanceModel.newInstanceSpec.ports;
+      return launchEC2InstanceModel.newInstanceSpec.ports;
     }
 
     function toggleNetworksRequirement(newValue) {

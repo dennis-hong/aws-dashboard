@@ -18,13 +18,13 @@
 
   describe('Launch Instance Configuration Step', function() {
 
-    describe('LaunchInstanceConfigurationController', function() {
+    describe('LaunchEC2InstanceConfigurationController', function() {
       var ctrl;
 
       beforeEach(module('horizon.dashboard.aws.workflow.launch-instance'));
 
       beforeEach(inject(function($controller) {
-        ctrl = $controller('LaunchInstanceConfigurationController');
+        ctrl = $controller('LaunchEC2InstanceConfigurationController');
       }));
 
       it('has correct disk configuration options', function() {

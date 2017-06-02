@@ -18,7 +18,7 @@
 
   describe('Launch Instance Security Groups Step', function() {
 
-    describe('LaunchInstanceSecurityGroupsController', function() {
+    describe('LaunchEC2InstanceSecurityGroupsController', function() {
       var ctrl;
 
       beforeEach(module('horizon.dashboard.aws'));
@@ -31,9 +31,9 @@
           securityGroups: [ 'group 1', 'group 2' ]
         };
         ctrl = $controller(
-          'LaunchInstanceSecurityGroupsController',
+          'LaunchEC2InstanceSecurityGroupsController',
           {
-            launchInstanceModel: model,
+            launchEC2InstanceModel: model,
             'horizon.dashboard.aws.workflow.launch-instance.basePath': ''
           });
       }));

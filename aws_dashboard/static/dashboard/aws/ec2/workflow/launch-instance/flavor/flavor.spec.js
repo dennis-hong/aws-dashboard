@@ -17,7 +17,7 @@
   'use strict';
 
   describe('Launch Instance Flavor Step', function () {
-    describe('LaunchInstanceFlavorController', function () {
+    describe('LaunchEC2InstanceFlavorController', function () {
       var ctrl, scope, model, defaults;
 
       beforeEach(module('horizon.dashboard.aws.workflow.launch-instance'));
@@ -45,10 +45,10 @@
                      remainingColorClass: "class3"
                    };
 
-        ctrl = $controller('LaunchInstanceFlavorController as selectFlavorCtrl',
+        ctrl = $controller('LaunchEC2InstanceFlavorController as selectFlavorCtrl',
                            { $scope:scope,
                              'horizon.framework.widgets.charts.quotaChartDefaults': defaults,
-                             launchInstanceModel: model });
+                             launchEC2InstanceModel: model });
       }));
 
       it('defines expected labels', function () {

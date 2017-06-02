@@ -22,7 +22,7 @@
     beforeEach(module('horizon.framework.widgets.action-list'));
     beforeEach(module('horizon.dashboard.aws.workflow.launch-instance'));
 
-    describe('LaunchInstanceNetworkController', function() {
+    describe('LaunchEC2InstanceNetworkController', function() {
       var scope, ctrl, model;
 
       beforeEach(inject(function($controller, $rootScope) {
@@ -41,9 +41,9 @@
         spyOn(scope, '$watch').and.callThrough();
         spyOn(scope, '$watchCollection').and.callThrough();
 
-        ctrl = $controller('LaunchInstanceNetworkController', {
+        ctrl = $controller('LaunchEC2InstanceNetworkController', {
           $scope: scope,
-          launchInstanceModel: model
+          launchEC2InstanceModel: model
         });
       }));
 

@@ -32,7 +32,7 @@
 
     beforeEach(inject(function($injector, $controller, _$q_, _$rootScope_) {
       novaAPI = $injector.get('horizon.app.core.openstack-service-api.nova');
-      ctrl = $controller('LaunchInstanceImportKeyPairController', {
+      ctrl = $controller('LaunchEC2InstanceImportKeyPairController', {
         $modalInstance: modalInstanceMock
       });
       $q = _$q_;

@@ -18,9 +18,9 @@
 
   /**
    * @ngdoc controller
-   * @name LaunchInstanceSourceController
+   * @name LaunchEC2InstanceSourceController
    * @description
-   * The `LaunchInstanceSourceController` controller provides functions for
+   * The `LaunchEC2InstanceSourceController` controller provides functions for
    * configuring the source step of the Launch Instance Wizard.
    *
    */
@@ -28,9 +28,9 @@
 
   angular
     .module('horizon.dashboard.aws.workflow.launch-instance')
-    .controller('LaunchInstanceSourceController', LaunchInstanceSourceController);
+    .controller('LaunchEC2InstanceSourceController', LaunchEC2InstanceSourceController);
 
-  LaunchInstanceSourceController.$inject = [
+  LaunchEC2InstanceSourceController.$inject = [
     '$scope',
     'horizon.dashboard.aws.workflow.launch-instance.boot-source-types',
     'bytesFilter',
@@ -43,7 +43,7 @@
     'horizon.framework.widgets.magic-search.events'
   ];
 
-  function LaunchInstanceSourceController($scope,
+  function LaunchEC2InstanceSourceController($scope,
     bootSourceTypes,
     bytesFilter,
     dateFilter,

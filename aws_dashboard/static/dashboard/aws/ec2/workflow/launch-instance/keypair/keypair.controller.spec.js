@@ -18,7 +18,7 @@
 
   describe('Launch Instance Keypair Step', function() {
 
-    describe('LaunchInstanceKeypairController', function() {
+    describe('LaunchEC2InstanceKeypairController', function() {
       var ctrl, q, settings;
       var $modal = { open: angular.noop };
       var toastServiceMock = {add: angular.noop};
@@ -55,8 +55,8 @@
           keypairs: [{name: 'key1'}, {name: 'key2'}]
         };
 
-        ctrl = $controller('LaunchInstanceKeypairController',
-                          { launchInstanceModel: model });
+        ctrl = $controller('LaunchEC2InstanceKeypairController',
+                          { launchEC2InstanceModel: model });
       }));
 
       it('contains its table labels', function() {

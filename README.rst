@@ -3,7 +3,9 @@ AWS Plugin For Openstack Horizon
 =========
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
-AWS Plugin For Openstack Horizon On Developing...
+On Developing... !! Experimental Project !!
+
+AWS Plugin For Openstack Horizon
 
 .. image:: https://cloud.githubusercontent.com/assets/23111859/26439340/af7acc86-4162-11e7-89de-48ef89451987.png
 
@@ -57,7 +59,9 @@ HOW TO USE
     cd aws-dashboard
     pip uninstall .
     cd ../horizon
-    rm openstack_dashboard/local/enabled/_3*.py*
+    rm openstack_dashboard/local/enabled/_30000_aws_dashboard.py
+    rm openstack_dashboard/local/enabled/_31000_aws_compute_panel_group.py
+    rm openstack_dashboard/local/enabled/_31100_aws_compute_ec2_panel.py
     rm openstack_dashboard/local/local_settings.d/_30000_aws_dashboard.py
     python manage.py collectstatic --noinput
     python manage.py compress --force

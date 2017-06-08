@@ -43,15 +43,20 @@ class Instances(generic.View):
         """Create an EC2 instance
         :param request: HTTP request
         """
-        instance_id = ec2.create_instance(
-            request,
-            name=request.DATA['name'],
-            image='ami-66e33108',
-            flavor='t2.micro',
-            key_name='dennis',
-            security_groups=['sg-873597ef', ],
-            instance_count=1
-        )
+        try:
+            instance_id = ec2.create_instance(
+                request,
+                name=request.DATA['name'],
+                image=request.DATA['source_id'],
+                flavor=request.DATA['flavor_id'],
+                key_name='dennis',
+                security_groups=['sg-873597ef', ],
+                instance_count=request.DATA['instance_count']
+            )
+        except KeyError as e:
+            raise rest_utils.AjaxError(400, 'missing required parameter '
+                                            "'%s'" % e.args[0])
+
         instance = ec2.get_instance(request, instance_id)
         return rest_utils.CreatedResponse(
             'aws/ec2/instances/%s' % utils_http.urlquote(instance_id),
@@ -61,4 +66,32 @@ class Instances(generic.View):
     @rest_utils.ajax()
     def delete(self, request, server_id):
         ec2.delete_instance(request, server_id)
+
+
+@urls.register
+class Images(generic.View):
+
+    url_regex = r'aws/ec2/images/$'
+
+    @rest_utils.ajax()
+    def get(self, request):
+        """Get EC2 image list"""
+        images = ec2.get_images(request)
+        return {
+            'items': [i.to_dict() for i in images],
+            'has_more_data': False,
+            'has_prev_data': False,
+        }
+
+
+@urls.register
+class Flavors(generic.View):
+    """API for EC2 flavors."""
+    url_regex = r'aws/ec2/flavors/$'
+
+    @rest_utils.ajax()
+    def get(self, request):
+        """Get a list of flavors."""
+        flavors = ec2.flavor_list()
+        return {'items': [f.to_dict() for f in flavors]}
 

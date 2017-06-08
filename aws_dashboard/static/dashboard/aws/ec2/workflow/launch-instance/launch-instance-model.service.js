@@ -226,7 +226,7 @@
 
         promise = $q.all([
           novaAPI.getAvailabilityZones().then(onGetAvailabilityZones, noop),
-          novaAPI.getFlavors(true, true).then(onGetFlavors, noop),
+          ec2API.getFlavors().then(onGetFlavors, noop),
           novaAPI.getKeypairs().then(onGetKeypairs, noop),
           novaAPI.getLimits(true).then(onGetNovaLimits, noop),
           securityGroup.query().then(onGetSecurityGroups, noop),
@@ -519,7 +519,7 @@
       var enabledSnapshot = allEnabled || !config.disable_instance_snapshot;
 
       if (enabledImage || enabledSnapshot) {
-        return glanceAPI.getImages({status: 'active'}).then(function getEnabledImages(data) {
+        return ec2API.getImages({State: 'available'}).then(function getEnabledImages(data) {
           if (enabledImage) {
             onGetImages(data);
           }
@@ -596,8 +596,7 @@
     function onGetImages(data) {
       model.images.length = 0;
       push.apply(model.images, data.data.items.filter(function (image) {
-        return isBootableImageType(image) &&
-          (!image.properties || image.properties.image_type !== 'snapshot');
+        return true
       }));
       addAllowedBootSource(model.images, bootSourceTypes.IMAGE, gettext('Image'));
     }

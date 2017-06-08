@@ -133,10 +133,11 @@
     var tableHeadCellsMap = {
       image: [
         { text: gettext('Name'), sortable: true, sortDefault: true },
-        { text: gettext('Updated'), sortable: true },
-        { text: gettext('Size'), classList: ['number'], sortable: true },
-        { text: gettext('Type'), sortable: true },
-        { text: gettext('Visibility'), sortable: true }
+        { text: gettext('CreationDate'), sortable: true },
+        { text: gettext('Public'), sortable: true },
+        { text: gettext('ImageType'), sortable: true },
+        { text: gettext('Architecture'), sortable: true },
+        { text: gettext('State'), sortable: true },
       ],
       snapshot: [
         { text: gettext('Name'), sortable: true, sortDefault: true },
@@ -167,11 +168,12 @@
     // Mapping for dynamic table data
     var tableBodyCellsMap = {
       image: [
-        { key: 'name', classList: ['hi-light', 'word-break'] },
-        { key: 'updated_at', filter: dateFilter, filterArg: 'short' },
-        { key: 'size', filter: bytesFilter, classList: ['number'] },
-        { key: 'disk_format', filter: diskFormatFilter, filterRawData: true },
-        { key: 'is_public', filter: decodeFilter, filterArg: _visibilitymap }
+        { key: 'Name', classList: ['hi-light', 'word-break'] },
+        { key: 'CreationDate', filter: dateFilter, filterArg: 'short' },
+        { key: 'Public', filter: decodeFilter, filterArg: _visibilitymap },
+        { key: 'ImageType' },
+        { key: 'Architecture' },
+        { key: 'State' }
       ],
       snapshot: [
         { key: 'name', classList: ['hi-light', 'word-break'] },

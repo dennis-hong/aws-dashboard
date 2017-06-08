@@ -40,6 +40,8 @@
 
     var service = {
       createServer: createServer,
+      getImages: getImages,
+      getFlavors: getFlavors
     };
 
     return service;
@@ -74,6 +76,20 @@
         });
     }
 
+    function getImages(params) {
+      var config = params ? { 'params' : params} : {};
+      return apiService.get('/api/aws/ec2/images/', config)
+        .error(function () {
+          toastService.add('error', gettext('Unable to retrieve the images.'));
+        });
+    }
 
+    function getFlavors(params) {
+      var config = params ? { 'params' : params} : {};
+      return apiService.get('/api/aws/ec2/flavors/', config)
+        .error(function () {
+          toastService.add('error', gettext('Unable to retrieve the flavors.'));
+        });
+    }
   }
 }());

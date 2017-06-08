@@ -26,7 +26,6 @@
    */
   angular
     .module('horizon.dashboard.aws', [
-      'horizon.dashboard.aws.containers',
       'horizon.dashboard.aws.workflow',
       'horizon.dashboard.aws.aws-service-api'
     ])

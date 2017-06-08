@@ -44,27 +44,23 @@
     ctrl.filterFacets = [
       {
         label: gettext('Name'),
-        name: 'name',
+        name: 'InstanceType',
         singleton: true
       },
       {
         label: gettext('VCPUs'),
-        name: 'vcpus',
+        name: 'vCPU',
         singleton: true
       },
       {
-        label: gettext('RAM'),
-        name: 'ram',
+        label: gettext('RAM(GiB)'),
+        name: 'Memory(GiB)',
         singleton: true
       },
       {
-        label: gettext('Public'),
-        name: 'isPublic',
-        singleton: true,
-        options: [
-          { label: gettext('No'), key: false },
-          { label: gettext('Yes'), key: true }
-        ]
+        label: gettext('Storage(GB)'),
+        name: 'Storage(GB)',
+        singleton: true
       }
     ];
 
@@ -199,19 +195,18 @@
     function buildFlavorFacades() {
       var facade, flavor;
 
+
+
       for (var i = 0; i < ctrl.flavors.length; i++) {
         flavor = ctrl.flavors[i];
         facade = {
           flavor:        flavor,
           id:            flavor.id,
-          name:          flavor.name,
-          vcpus:         flavor.vcpus,
-          ram:           flavor.ram,
-          totalDisk:     flavor.disk + flavor['OS-FLV-EXT-DATA:ephemeral'],
-          rootDisk:      flavor.disk,
-          ephemeralDisk: flavor['OS-FLV-EXT-DATA:ephemeral'],
-          isPublic:      flavor['os-flavor-access:is_public'],
-          extras:        flavor.extras
+          name:          flavor.InstanceType,
+          vcpus:         flavor.vCPU,
+          ram:           flavor.Memory,
+          storage:       flavor.Storage,
+          network:       flavor.NetworkingPerformance
         };
         ctrl.availableFlavorFacades.push(facade);
       }

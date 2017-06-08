@@ -28,12 +28,10 @@ limitations under the License.
       <tr>
         <th class="expander"></th>
         <th st-sort="name" class="rsp-p1" translate>Name</th>
-        <th st-sort="vcpus" class="rsp-p1" translate>VCPUS</th>
+        <th st-sort="vcpus" class="rsp-p1" translate>vCPUs</th>
         <th st-sort="ram" class="rsp-p1" translate>RAM</th>
-        <th st-sort="totalDisk" class="rsp-p1" translate>Total Disk</th>
-        <th st-sort="rootDisk" class="rsp-p2" translate>Root Disk</th>
-        <th st-sort="ephemeralDisk" class="rsp-p2" translate>Ephemeral Disk</th>
-        <th st-sort="isPublic" class="rsp-p1" translate>Public</th>
+        <th st-sort="storage" class="rsp-p1" translate>Storage</th>
+        <th st-sort="network" class="rsp-p1" translate>Networking Performance</th>
         <th></th>
       </tr>
     </thead>
@@ -65,19 +63,10 @@ limitations under the License.
             popover="{$ item.errors.ram $}"
             popover-placement="top" popover-append-to-body="true"
             popover-trigger="mouseenter mouseleave"/>
-          {$ ::item.ram | mb $}
+          {$ ::item.ram | gb $}
         </td>
-        <td class="rsp-p1">{$ ::item.totalDisk | gb $}</td>
-        <td class="rsp-p2">
-          <span class="invalid fa fa-exclamation-triangle"
-            ng-show="item.errors.disk"
-            popover="{$ item.errors.disk $}"
-            popover-placement="top" popover-append-to-body="true"
-            popover-trigger="mouseenter mouseleave"/>
-          {$ ::item.rootDisk | gb $}
-        </td>
-        <td class="rsp-p2">{$ ::item.ephemeralDisk | gb $}</td>
-        <td class="rsp-p1">{$ ::item.isPublic | yesno $}</td>
+        <td class="rsp-p2">{$ ::item.storage $}</td>
+        <td class="rsp-p1">{$ ::item.network $}</td>
         <td class="action-col">
           <action-list button-tooltip="item.disabledMessage"
               bt-model="tooltipModel"
@@ -139,12 +128,10 @@ limitations under the License.
       <tr>
         <th class="expander"></th>
         <th st-sort="name" class="rsp-p1" translate>Name</th>
-        <th st-sort="vcpus" class="rsp-p1" translate>VCPUS</th>
+        <th st-sort="vcpu" class="rsp-p1" translate>vCPUs</th>
         <th st-sort-default st-sort="ram" class="rsp-p1" translate>RAM</th>
-        <th st-sort="totalDisk" class="rsp-p1" translate>Total Disk</th>
-        <th st-sort="rootDisk" class="rsp-p2" translate>Root Disk</th>
-        <th st-sort="ephemeralDisk" class="rsp-p2" translate>Ephemeral Disk</th>
-        <th st-sort="isPublic" class="rsp-p1" translate>Public</th>
+        <th st-sort="storage" class="rsp-p1" translate>Storage</th>
+        <th st-sort="network" class="rsp-p1" translate>Networking Performance</th>
         <th></th>
       </tr>
     </thead>
@@ -176,19 +163,17 @@ limitations under the License.
             popover="{$ item.errors.ram $}"
             popover-placement="top" popover-append-to-body="true"
             popover-trigger="mouseenter mouseleave"/>
-          {$ ::item.ram | mb $}
+          {$ ::item.ram | gb $}
         </td>
-        <td class="rsp-p1">{$ ::item.totalDisk | gb $}</td>
         <td class="rsp-p2">
           <span class="invalid fa fa-exclamation-triangle"
-            ng-show="item.errors.disk"
-            popover="{$ item.errors.disk $}"
+            ng-show="item.errors.storage"
+            popover="{$ item.errors.storage $}"
             popover-placement="top" popover-append-to-body="true"
             popover-trigger="mouseenter mouseleave"/>
-          {$ ::item.rootDisk | gb $}
+          {$ ::item.storage $}
         </td>
-        <td class="rsp-p2">{$ ::item.ephemeralDisk | gb $}</td>
-        <td class="rsp-p1">{$ ::item.isPublic | yesno $}</td>
+        <td class="rsp-p2">{$ ::item.network $}</td>
         <td class="action-col">
           <action-list button-tooltip="item.disabledMessage"
               bt-model="tooltipModel"

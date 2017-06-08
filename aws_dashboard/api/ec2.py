@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import json
+from os import path
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -49,6 +52,27 @@ class Ec2Instance(base.APIDictWrapper):
         self.tenant_id = "tenant_id"
 
 
+class AwsImage(base.APIDictWrapper):
+    _attrs = ['id', 'Name', 'State', 'Public',
+              'VirtualizationType', 'Hypervisor', 'ImageOwnerAlias', 'EnaSupport',
+              'SriovNetSupport', 'ImageId', 'BlockDeviceMappings', 'Architecture',
+              'ImageLocation', 'RootDeviceType', 'OwnerId', 'RootDeviceName',
+              'CreationDate', 'ImageType', 'Description']
+
+    def __init__(self, apidict):
+        apidict['id'] = apidict['ImageId']
+        super(AwsImage, self).__init__(apidict)
+
+
+class InstanceType(base.APIDictWrapper):
+    _attrs = ['id', 'InstanceType', 'vCPU', 'Memory(GiB)', 'Storage(GB)', 'PhysicalProcessor',
+              'ClockSpeed(GHz)', 'EBS_OPT', 'EnhancedNetworking',
+              'IntelAVX2', 'IntelAVX', 'IntelTurbo', 'NetworkingPerformance']
+
+    def __init__(self, apidict):
+        apidict['id'] = apidict['InstanceType']
+        super(InstanceType, self).__init__(apidict)
+
 
 def _get_api_key(project_id):
     keys_dict = getattr(settings, 'AWS_API_KEY_DICT', {})
@@ -79,6 +103,21 @@ def _to_instances(reservations):
         for ec2_instance in reservation.get('Instances'):
             instances.append(Ec2Instance(ec2_instance))
     return instances
+
+
+def _to_images(aws_images):
+    images = []
+    for aws_image in aws_images.get('Images'):
+            images.append(AwsImage(aws_image))
+    return images
+
+
+def _to_instance_types(aws_instance_types):
+    instance_types = []
+    for k in aws_instance_types.keys():
+        instance_types.append(InstanceType(aws_instance_types.get(k)))
+    LOG.debug('dennis>> {}'.format(instance_types))
+    return instance_types
 
 
 @memoized
@@ -161,3 +200,39 @@ def create_instance(request, name, image, flavor, key_name, security_groups, ins
         ]
     )
     return instance[0].id
+
+
+def get_images(request):
+    response = None
+    try:
+        response = ec2_client(request).describe_images(
+            Filters=[
+                {
+                    'Name': 'name',
+                    'Values': [
+                        'RHEL-7.2*',
+                        'suse-sles-12-*',
+                        'ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*',
+                        'amzn-ami-hvm-*',
+                    ]
+                },
+                {
+                    'Name': 'state',
+                    'Values': [
+                        'available',
+                    ]
+                },
+            ]
+        )
+    except ClientError as e:
+        LOG.error("Image List Received error: %s", e, exc_info=True)
+    return _to_images(response)
+
+
+def flavor_list():
+    """Get the list of available instance type (flavors)."""
+    with open(path.join(path.dirname(path.realpath(__file__)), 'instanceType.json'), 'r') as r:
+        rd = json.load(r)
+        instance_types = rd
+        r.close()
+    return _to_instance_types(instance_types)

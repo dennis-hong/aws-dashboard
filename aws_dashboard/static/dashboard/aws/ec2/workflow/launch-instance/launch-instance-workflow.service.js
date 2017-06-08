@@ -53,14 +53,6 @@
           formName: 'launchInstanceFlavorForm'
         },
         {
-          id: 'networks',
-          title: gettext('Networks'),
-          templateUrl: basePath + 'network/network.html',
-          helpUrl: basePath + 'network/network.help.html',
-          formName: 'launchInstanceNetworkForm',
-          requiredServiceTypes: ['network']
-        },
-        {
           id: 'secgroups',
           title: gettext('Security Groups'),
           templateUrl: basePath + 'security-groups/security-groups.html',

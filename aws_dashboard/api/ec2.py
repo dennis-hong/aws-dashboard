@@ -282,3 +282,15 @@ def list_keypairs(request):
     """Get the list of ssh key."""
     response = ec2_client(request).describe_key_pairs()
     return _to_keyfairs(response)
+
+
+def start_instance(request, instance_id):
+    ec2_client(request).start_instances(InstanceIds=[instance_id, ])
+
+
+def stop_instance(request, instance_id):
+    ec2_client(request).stop_instances(InstanceIds=[instance_id, ])
+
+
+def reboot_instance(request, instance_id):
+    ec2_client(request).reboot_instances(InstanceIds=[instance_id, ])

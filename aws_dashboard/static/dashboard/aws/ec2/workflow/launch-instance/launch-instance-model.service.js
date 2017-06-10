@@ -21,10 +21,8 @@
     '$log',
     'horizon.app.core.openstack-service-api.cinder',
     'horizon.app.core.openstack-service-api.glance',
-    'horizon.app.core.openstack-service-api.neutron',
     'horizon.app.core.openstack-service-api.nova',
     'horizon.app.core.openstack-service-api.novaExtensions',
-    'horizon.app.core.openstack-service-api.security-group',
     'horizon.app.core.openstack-service-api.serviceCatalog',
     'horizon.app.core.openstack-service-api.settings',
     'horizon.dashboard.aws.workflow.launch-instance.boot-source-types',
@@ -42,10 +40,8 @@
    * @param {Object} $log
    * @param {Object} cinderAPI
    * @param {Object} glanceAPI
-   * @param {Object} neutronAPI
    * @param {Object} novaAPI
    * @param {Object} novaExtensions
-   * @param {Object} securityGroup
    * @param {Object} serviceCatalog
    * @param {Object} settings
    * @param {Object} bootSourceTypes
@@ -67,10 +63,8 @@
     $log,
     cinderAPI,
     glanceAPI,
-    neutronAPI,
     novaAPI,
     novaExtensions,
-    securityGroup,
     serviceCatalog,
     settings,
     bootSourceTypes,
@@ -227,10 +221,9 @@
         promise = $q.all([
           novaAPI.getAvailabilityZones().then(onGetAvailabilityZones, noop),
           ec2API.getFlavors().then(onGetFlavors, noop),
-          novaAPI.getKeypairs().then(onGetKeypairs, noop),
+          ec2API.getKeypairs().then(onGetKeypairs, noop),
           novaAPI.getLimits(true).then(onGetNovaLimits, noop),
-          securityGroup.query().then(onGetSecurityGroups, noop),
-          serviceCatalog.ifTypeEnabled('network').then(getNetworks, noop),
+          ec2API.getSecurityGroups().then(onGetSecurityGroups, noop),
           launchInstanceDefaults.then(addImageSourcesIfEnabled, noop),
           launchInstanceDefaults.then(setDefaultValues, noop),
           launchInstanceDefaults.then(addVolumeSourcesIfEnabled, noop)
@@ -282,8 +275,6 @@
 
       setFinalSpecBootsource(finalSpec);
       setFinalSpecFlavor(finalSpec);
-      setFinalSpecNetworks(finalSpec);
-      setFinalSpecPorts(finalSpec);
       setFinalSpecKeyPairs(finalSpec);
       setFinalSpecSecurityGroups(finalSpec);
       setFinalSpecServerGroup(finalSpec);
@@ -360,12 +351,12 @@
     function onGetKeypairs(data) {
       angular.extend(
         model.keypairs,
-        data.data.items.map(function (e) {
-          e.keypair.id = 'li_keypair:' + e.keypair.name;
-          return e.keypair;
+        data.data.items.map(function (keypair) {
+          keypair.id = 'li_keypair:' + keypair.name;
+          return keypair;
         }));
       if (data.data.items.length === 1) {
-        model.newInstanceSpec.key_pair.push(data.data.items[0].keypair);
+        model.newInstanceSpec.key_pair.push(data.data.items[0]);
       }
     }
 
@@ -385,11 +376,7 @@
     function onGetSecurityGroups(data) {
       model.securityGroups.length = 0;
       angular.forEach(data.data.items, function addDefault(item) {
-        // 'default' is a special security group in neutron. It can not be
-        // deleted and is guaranteed to exist. It by default contains all
-        // of the rules needed for an instance to reach out to the network
-        // so the instance can provision itself.
-        if (item.name === 'default') {
+        if (item.GroupName === 'default') {
           model.newInstanceSpec.security_groups.push(item);
         }
       });
@@ -400,11 +387,7 @@
       // pull out the ids from the security groups objects
       var securityGroupIds = [];
       finalSpec.security_groups.forEach(function(securityGroup) {
-        if (model.neutronEnabled) {
-          securityGroupIds.push(securityGroup.id);
-        } else {
-          securityGroupIds.push(securityGroup.name);
-        }
+        securityGroupIds.push(securityGroup.id);
       });
       finalSpec.security_groups = securityGroupIds;
     }
@@ -428,88 +411,6 @@
       }
       delete finalSpec.server_groups;
     }
-
-    // Networks
-
-    function getNetworks() {
-      return neutronAPI.getNetworks().then(onGetNetworks, noop).then(getPorts, noop);
-    }
-
-    function onGetNetworks(data) {
-      model.neutronEnabled = true;
-      model.networks.length = 0;
-      if (data.data.items.length === 1) {
-        model.newInstanceSpec.networks.push(data.data.items[0]);
-      }
-      push.apply(model.networks,
-        data.data.items.filter(function(net) {
-          return net.subnets.length > 0;
-        }));
-      return data;
-    }
-
-    function setFinalSpecNetworks(finalSpec) {
-      finalSpec.nics = [];
-      finalSpec.networks.forEach(function (network) {
-        finalSpec.nics.push(
-          {
-            "net-id": network.id,
-            "v4-fixed-ip": ""
-          });
-      });
-      delete finalSpec.networks;
-    }
-
-    function getPorts(networks) {
-      model.ports.length = 0;
-      networks.data.items.forEach(function(network) {
-        return neutronAPI.getPorts({network_id: network.id}).then(
-          function(ports) {
-            onGetPorts(ports, network);
-          }, noop
-        );
-      });
-    }
-
-    function onGetPorts(networkPorts, network) {
-      var ports = [];
-      networkPorts.data.items.forEach(function(port) {
-        // no device_owner means that the port can be attached
-        if (port.device_owner === "" && port.admin_state === "UP") {
-          port.subnet_names = getPortSubnets(port, network.subnets);
-          port.network_name = network.name;
-          ports.push(port);
-        }
-      });
-      push.apply(model.ports, ports);
-    }
-
-    // helper function to return an object of IP:NAME pairs for subnet mapping
-    function getPortSubnets(port, subnets) {
-      var subnetNames = {};
-      port.fixed_ips.forEach(function (ip) {
-        subnets.forEach(function (subnet) {
-          if (ip.subnet_id === subnet.id) {
-            subnetNames[ip.ip_address] = subnet.name;
-          }
-        });
-      });
-
-      return subnetNames;
-    }
-
-    function setFinalSpecPorts(finalSpec) {
-      // nics should already be filled so we only append to it
-      finalSpec.ports.forEach(function (port) {
-        finalSpec.nics.push(
-          {
-            "port-id": port.id
-          });
-      });
-      delete finalSpec.ports;
-    }
-
-    // Boot Source
 
     function addImageSourcesIfEnabled(config) {
       // in case settings are deleted or not present

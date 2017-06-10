@@ -49,10 +49,10 @@ class Ec2Instance(base.APIDictWrapper):
         if self.name is None:
             self.name = "No Name"
         self.status = self.InstanceId
-        self.tenant_id = "tenant_id"
+        self.tenant_id = "aws_ec2"
 
 
-class AwsImage(base.APIDictWrapper):
+class Image(base.APIDictWrapper):
     _attrs = ['id', 'Name', 'State', 'Public',
               'VirtualizationType', 'Hypervisor', 'ImageOwnerAlias', 'EnaSupport',
               'SriovNetSupport', 'ImageId', 'BlockDeviceMappings', 'Architecture',
@@ -61,12 +61,12 @@ class AwsImage(base.APIDictWrapper):
 
     def __init__(self, apidict):
         apidict['id'] = apidict['ImageId']
-        super(AwsImage, self).__init__(apidict)
+        super(Image, self).__init__(apidict)
 
 
 class InstanceType(base.APIDictWrapper):
-    _attrs = ['id', 'InstanceType', 'vCPU', 'Memory(GiB)', 'Storage(GB)', 'PhysicalProcessor',
-              'ClockSpeed(GHz)', 'EBS_OPT', 'EnhancedNetworking',
+    _attrs = ['id', 'InstanceType', 'vCPU', 'Memory', 'Storage', 'PhysicalProcessor',
+              'ClockSpeed', 'EBS_OPT', 'EnhancedNetworking',
               'IntelAVX2', 'IntelAVX', 'IntelTurbo', 'NetworkingPerformance']
 
     def __init__(self, apidict):
@@ -74,27 +74,24 @@ class InstanceType(base.APIDictWrapper):
         super(InstanceType, self).__init__(apidict)
 
 
-def _get_api_key(project_id):
-    keys_dict = getattr(settings, 'AWS_API_KEY_DICT', {})
-    key_set = keys_dict.get(project_id)
-    if key_set is None:
-        LOG.error("Not Found project_id : %s in AWS_API_KEY_DICT." % project_id)
-        raise ImproperlyConfigured("AWS API Key Not Found. Please Check in "
-                                   "local_settings.d/_30000_aws_dashboard.py")
+class SecurityGroup(base.APIDictWrapper):
+    _attrs = ['id', 'GroupName', 'Description', 'IpPermissions', 'IpRanges',
+              'IpPermissionsEgress', 'Ipv6Ranges', 'EnhancedNetworking',
+              'UserIdGroupPairs', 'VpcId', 'OwnerId', 'GroupId']
 
-    aws_access_key_id = key_set.get('AWS_ACCESS_KEY_ID', '')
-    aws_secret_access_key = key_set.get('AWS_SECRET_ACCESS_KEY', '')
-    region_name = key_set.get('AWS_REGION_NAME', '')
-    if aws_access_key_id == "" or aws_secret_access_key == "" or region_name == "":
-        LOG.error("aws_access_key_id : %(aws_access_key_id)s "
-                  "aws_secret_access_key : %(aws_secret_access_key)s "
-                  "region_name: %(region_name)s" %
-                  dict(aws_access_key_id=aws_access_key_id,
-                       aws_secret_access_key=aws_secret_access_key,
-                       region_name=region_name))
-        raise ImproperlyConfigured("AWS API Key Not Found. Please Check in "
-                                   "local_settings.d/_30000_aws_dashboard.py")
-    return aws_access_key_id, aws_secret_access_key, region_name
+    def __init__(self, apidict):
+        apidict['id'] = apidict['GroupId']
+        apidict['security_group_rules'] = apidict['IpPermissions']
+        super(SecurityGroup, self).__init__(apidict)
+
+
+class KeyFair(base.APIDictWrapper):
+    _attrs = ['name', 'key']
+
+    def __init__(self, apidict):
+        apidict['name'] = apidict['KeyName']
+        apidict['fingerprint'] = apidict['KeyFingerprint']
+        super(KeyFair, self).__init__(apidict)
 
 
 def _to_instances(reservations):
@@ -108,7 +105,7 @@ def _to_instances(reservations):
 def _to_images(aws_images):
     images = []
     for aws_image in aws_images.get('Images'):
-            images.append(AwsImage(aws_image))
+            images.append(Image(aws_image))
     return images
 
 
@@ -116,35 +113,72 @@ def _to_instance_types(aws_instance_types):
     instance_types = []
     for k in aws_instance_types.keys():
         instance_types.append(InstanceType(aws_instance_types.get(k)))
-    LOG.debug('dennis>> {}'.format(instance_types))
     return instance_types
+
+
+def _to_security_groups(aws_sg_list):
+    sg_list = []
+    for aws_sg in aws_sg_list.get('SecurityGroups'):
+        sg_list.append(SecurityGroup(aws_sg))
+    return sg_list
+
+
+def _to_keyfairs(aws_key_list):
+    key_list = []
+    for aws_key in aws_key_list.get('KeyPairs'):
+        key_list.append(KeyFair(aws_key))
+    return key_list
+
+
+def _get_api_keys(project_id):
+    keys_dict = getattr(settings, 'AWS_API_KEY_DICT', {})
+    key_set = keys_dict.get(project_id)
+    _validate_key_set(key_set)
+    return key_set.get('AWS_ACCESS_KEY_ID'), key_set.get('AWS_SECRET_ACCESS_KEY'), key_set.get('AWS_REGION_NAME')
+
+
+def _validate_key_set(key_set):
+    if key_set is None:
+        LOG.error("Not Found AWS API key set.")
+        raise ImproperlyConfigured("AWS API Key Not Found. Please Check in "
+                                   "local_settings.d/_30000_aws_dashboard.py")
+    aws_access_key_id = key_set.get('AWS_ACCESS_KEY_ID', '')
+    aws_secret_access_key = key_set.get('AWS_SECRET_ACCESS_KEY', '')
+    region_name = key_set.get('AWS_REGION_NAME', '')
+    if aws_access_key_id == "" or aws_secret_access_key == "" or region_name == "":
+        LOG.error("aws_access_key_id : %(aws_access_key_id)s "
+                  "aws_secret_access_key : %(aws_secret_access_key)s "
+                  "region_name: %(region_name)s" %
+                  dict(aws_access_key_id=aws_access_key_id,
+                       aws_secret_access_key=aws_secret_access_key,
+                       region_name=region_name))
+        raise ImproperlyConfigured("AWS API Key Not Found. Please Check in "
+                                   "local_settings.d/_30000_aws_dashboard.py")
 
 
 @memoized
 def ec2_client(request):
     project_id = request.user.tenant_id
-    aws_access_key_id, aws_secret_access_key, region_name = _get_api_key(project_id)
+    aws_access_key_id, aws_secret_access_key, region_name = _get_api_keys(project_id)
 
     c = boto3.client(
         'ec2',
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         region_name=region_name)
-    boto3.set_stream_logger(level=logging.WARN)
     return c
 
 
 @memoized
 def ec2_resource(request):
     project_id = request.user.tenant_id
-    aws_access_key_id, aws_secret_access_key, region_name = _get_api_key(project_id)
+    aws_access_key_id, aws_secret_access_key, region_name = _get_api_keys(project_id)
 
     r = boto3.resource(
         'ec2',
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         region_name=region_name)
-    boto3.set_stream_logger(level=logging.WARN)
     return r
 
 
@@ -229,10 +263,22 @@ def get_images(request):
     return _to_images(response)
 
 
-def flavor_list():
+def list_flavor():
     """Get the list of available instance type (flavors)."""
     with open(path.join(path.dirname(path.realpath(__file__)), 'instanceType.json'), 'r') as r:
         rd = json.load(r)
         instance_types = rd
         r.close()
     return _to_instance_types(instance_types)
+
+
+def list_security_groups(request):
+    """Get the list of available security groups."""
+    aws_sg_list = ec2_client(request).describe_security_groups()
+    return _to_security_groups(aws_sg_list)
+
+
+def list_keypairs(request):
+    """Get the list of ssh key."""
+    response = ec2_client(request).describe_key_pairs()
+    return _to_keyfairs(response)

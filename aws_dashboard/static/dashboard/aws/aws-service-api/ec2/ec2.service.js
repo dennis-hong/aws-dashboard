@@ -41,7 +41,9 @@
     var service = {
       createServer: createServer,
       getImages: getImages,
-      getFlavors: getFlavors
+      getFlavors: getFlavors,
+      getSecurityGroups: getSecurityGroups,
+      getKeypairs: getKeypairs
     };
 
     return service;
@@ -91,5 +93,20 @@
           toastService.add('error', gettext('Unable to retrieve the flavors.'));
         });
     }
+
+    function getSecurityGroups() {
+      return apiService.get('/api/aws/ec2/security-groups/')
+        .error(function () {
+          toastService.add('error', gettext('Unable to retrieve the security groups.'));
+        });
+    }
+
+    function getKeypairs() {
+      return apiService.get('/api/aws/ec2/keypairs/')
+        .error(function () {
+          toastService.add('error', gettext('Unable to retrieve the keypairs.'));
+        });
+    }
+
   }
 }());

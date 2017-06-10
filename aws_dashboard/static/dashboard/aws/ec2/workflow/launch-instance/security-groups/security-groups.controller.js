@@ -57,13 +57,13 @@
 
     ctrl.filterFacets = [
       {
-        label: gettext('Name'),
-        name: 'name',
+        label: gettext('GroupName'),
+        name: 'GroupName',
         singleton: true
       },
       {
         label: gettext('Description'),
-        name: 'description',
+        name: 'Description',
         singleton: true
       }
     ];

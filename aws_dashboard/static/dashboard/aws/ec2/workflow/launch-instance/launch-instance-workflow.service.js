@@ -22,11 +22,10 @@
 
   launchInstanceWorkflow.$inject = [
     'horizon.dashboard.aws.workflow.launch-instance.basePath',
-    'horizon.dashboard.aws.workflow.launch-instance.step-policy',
     'horizon.app.core.workflow.factory'
   ];
 
-  function launchInstanceWorkflow(basePath, stepPolicy, dashboardWorkflow) {
+  function launchInstanceWorkflow(basePath, dashboardWorkflow) {
     return dashboardWorkflow({
       title: gettext('Launch Instance'),
 
@@ -65,20 +64,6 @@
           templateUrl: basePath + 'keypair/keypair.html',
           helpUrl: basePath + 'keypair/keypair.help.html',
           formName: 'launchInstanceKeypairForm'
-        },
-        {
-          id: 'configuration',
-          title: gettext('Configuration'),
-          templateUrl: basePath + 'configuration/configuration.html',
-          helpUrl: basePath + 'configuration/configuration.help.html',
-          formName: 'launchInstanceConfigurationForm'
-        },
-        {
-          id: 'metadata',
-          title: gettext('Metadata'),
-          templateUrl: basePath + 'metadata/metadata.html',
-          helpUrl: basePath + 'metadata/metadata.help.html',
-          formName: 'launchInstanceMetadataForm'
         }
       ],
 

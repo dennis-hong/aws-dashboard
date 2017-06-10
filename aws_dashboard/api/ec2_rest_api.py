@@ -92,6 +92,39 @@ class Flavors(generic.View):
     @rest_utils.ajax()
     def get(self, request):
         """Get a list of flavors."""
-        flavors = ec2.flavor_list()
+        flavors = ec2.list_flavor()
         return {'items': [f.to_dict() for f in flavors]}
 
+
+@urls.register
+class SecurityGroups(generic.View):
+    """API over all server security groups.
+    """
+    url_regex = r'aws/ec2/security-groups/$'
+
+    @rest_utils.ajax()
+    def get(self, request):
+        """Get a list of security groups.
+
+        The listing result is an object with property "items". Each item is
+        security group associated with this server.
+        """
+        groups = ec2.list_security_groups(request)
+        return {'items': [s.to_dict() for s in groups]}
+
+
+@urls.register
+class Keypairs(generic.View):
+    """API for nova keypairs.
+    """
+    url_regex = r'aws/ec2/keypairs/$'
+
+    @rest_utils.ajax()
+    def get(self, request):
+        """Get a list of keypairs associated with the current logged-in
+        account.
+
+        The listing result is an object with property "items".
+        """
+        result = ec2.list_keypairs(request)
+        return {'items': [u.to_dict() for u in result]}

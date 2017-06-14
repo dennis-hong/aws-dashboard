@@ -41,7 +41,7 @@ HOW TO USE
 
 5. Configure "AWS API Key" in your horizon local setting::
 
-    vi horizon/openstack_dashboard/local/local_settings.d/_30000_aws_dashboard.py
+    vi openstack_dashboard/local/local_settings.d/_30000_aws_dashboard.py
     
     AWS_API_KEY_DICT = {
         "$PROJECT_UUID": {

@@ -35,7 +35,7 @@ class SetFlavorChoiceAction(workflows.Action):
         widget=forms.TextInput(attrs={'readonly': 'readonly'}),
         required=False,
     )
-    flavor = forms.ThemableChoiceField(
+    flavor = forms.ChoiceField(
         label=_("New Flavor"),
         help_text=_("Choose the flavor to launch."))
 

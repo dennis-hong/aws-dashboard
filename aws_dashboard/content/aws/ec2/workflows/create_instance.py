@@ -53,8 +53,8 @@ LOG = logging.getLogger(__name__)
 
 
 class SelectProjectUserAction(workflows.Action):
-    project_id = forms.ThemableChoiceField(label=_("Project"))
-    user_id = forms.ThemableChoiceField(label=_("User"))
+    project_id = forms.ChoiceField(label=_("Project"))
+    user_id = forms.ChoiceField(label=_("User"))
 
     def __init__(self, request, *args, **kwargs):
         super(SelectProjectUserAction, self).__init__(request, *args, **kwargs)
@@ -80,31 +80,31 @@ class SelectProjectUser(workflows.Step):
 
 
 class SetInstanceDetailsAction(workflows.Action):
-    availability_zone = forms.ThemableChoiceField(label=_("Availability Zone"),
+    availability_zone = forms.ChoiceField(label=_("Availability Zone"),
                                                   required=False)
 
     name = forms.CharField(label=_("Instance Name"),
                            max_length=255)
 
-    flavor = forms.ThemableChoiceField(label=_("Flavor"),
+    flavor = forms.ChoiceField(label=_("Flavor"),
                                        help_text=_("Size of image to launch."))
 
     count = forms.IntegerField(label=_("Number of Instances"),
                                min_value=1,
                                initial=1)
 
-    source_type = forms.ThemableChoiceField(
+    source_type = forms.ChoiceField(
         label=_("Instance Boot Source"),
         help_text=_("Choose Your Boot Source "
                     "Type."))
 
-    instance_snapshot_id = forms.ThemableChoiceField(
+    instance_snapshot_id = forms.ChoiceField(
         label=_("Instance Snapshot"),
         required=False)
 
-    volume_id = forms.ThemableChoiceField(label=_("Volume"), required=False)
+    volume_id = forms.ChoiceField(label=_("Volume"), required=False)
 
-    volume_snapshot_id = forms.ThemableChoiceField(label=_("Volume Snapshot"),
+    volume_snapshot_id = forms.ChoiceField(label=_("Volume Snapshot"),
                                                    required=False)
 
     image_id = forms.ChoiceField(
@@ -818,7 +818,7 @@ class SetNetworkPorts(workflows.Step):
 
 
 class SetAdvancedAction(workflows.Action):
-    disk_config = forms.ThemableChoiceField(
+    disk_config = forms.ChoiceField(
         label=_("Disk Partition"), required=False,
         help_text=_("Automatic: The entire disk is a single partition and "
                     "automatically resizes. Manual: Results in faster build "
@@ -828,7 +828,7 @@ class SetAdvancedAction(workflows.Action):
         required=False, help_text=_("Configure OpenStack to write metadata to "
                                     "a special configuration drive that "
                                     "attaches to the instance when it boots."))
-    server_group = forms.ThemableChoiceField(
+    server_group = forms.ChoiceField(
         label=_("Server Group"), required=False,
         help_text=_("Server group to associate with this instance."))
 

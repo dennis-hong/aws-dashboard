@@ -560,9 +560,9 @@ class InstancesFilterAction(tables.FilterAction):
 
 
 class Ec2InstanceTable(tables.DataTable):
-    name = tables.WrappingColumn("name",
-                                 link="horizon:project:instances:detail",
-                                 verbose_name=_("Instance Name"))
+    name = tables.Column("name",
+                         link="horizon:project:instances:detail",
+                         verbose_name=_("Instance Name"))
     image_name = tables.Column("ImageId",
                                verbose_name=_("Image ID"))
     ip = tables.Column(get_ips,

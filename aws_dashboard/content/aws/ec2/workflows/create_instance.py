@@ -540,7 +540,7 @@ KEYPAIR_IMPORT_URL = "horizon:project:access_and_security:keypairs:import"
 
 
 class SetAccessControlsAction(workflows.Action):
-    keypair = forms.ThemableDynamicChoiceField(
+    keypair = forms.DynamicChoiceField(
         label=_("Key Pair"),
         help_text=_("Key pair to use for "
                     "authentication."),
@@ -559,7 +559,7 @@ class SetAccessControlsAction(workflows.Action):
         label=_("Security Groups"),
         required=False,
         initial=["default"],
-        widget=forms.ThemableCheckboxSelectMultiple(),
+        widget=forms.CheckboxSelectMultiple(),
         help_text=_("Launch instance in these "
                     "security groups."))
 
@@ -709,7 +709,7 @@ class PostCreationStep(workflows.Step):
 class SetNetworkAction(workflows.Action):
     network = forms.MultipleChoiceField(
         label=_("Networks"),
-        widget=forms.ThemableCheckboxSelectMultiple(),
+        widget=forms.CheckboxSelectMultiple(),
         error_messages={
             'required': _(
                 "At least one network must"

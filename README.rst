@@ -23,9 +23,11 @@ HOW TO USE
     cp ./aws_dashboard/local/enabled/_3*.py ../horizon/openstack_dashboard/local/enabled/
     cp ./aws_dashboard/local/local_settings.d/_30000_aws_dashboard.py ../horizon/openstack_dashboard/local/local_settings.d/
 
-3. pip install plugin::
+3. install plugin::
 
     sudo pip install -e .
+    sudo python setup.py build
+    sudo python setup.py install
 
 4. Go back into the horizon repository and collect your static files::
 

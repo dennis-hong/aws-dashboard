@@ -110,7 +110,7 @@ class SetInstanceDetailsAction(workflows.Action):
     image_id = forms.ChoiceField(
         label=_("Image Name"),
         required=False,
-        widget=forms.ThemableSelectWidget(
+        widget=forms.SelectWidget(
             data_attrs=('volume_size',),
             transform=lambda x: ("%s (%s)" % (x.name,
                                               filesizeformat(x.bytes)))))
@@ -635,7 +635,7 @@ class CustomizeAction(workflows.Action):
     script_source = forms.ChoiceField(
         label=_('Customization Script Source'),
         choices=source_choices,
-        widget=forms.ThemableSelectWidget(attrs=attributes),
+        widget=forms.SelectWidget(attrs=attributes),
         required=False)
 
     script_help = _("A script or set of commands to be executed after the "

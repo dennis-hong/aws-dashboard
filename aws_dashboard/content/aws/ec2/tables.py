@@ -544,11 +544,10 @@ TASK_DISPLAY_NONE = pgettext_lazy("Task status of an Instance", u"None")
 
 
 STATUS_CHOICES = (
-    ("Running", True),
-    ("Stopped", False),
-    ("Error", False),
-    ("Pending", False),
-    ("Terminated", False),
+    ("running", True),
+    ("stopped", False),
+    ("error", False),
+    ("terminated", False),
 )
 
 

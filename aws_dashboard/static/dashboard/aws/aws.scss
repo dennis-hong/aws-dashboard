@@ -1,60 +1,7 @@
 ///*
-// * Bootstrap styles table backgrounds using nth-child(2n+1), which is
-// * oblivious to hidden elements. The styles below allow us to override
-// * the bootstrap style when necessary by setting the odd/even classes.
+// * Add Your Style
 // */
-.table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: #fff;
-}
 
-.table-striped.datatable tbody {
-  td {
-    background-clip: padding-box;
-  }
-  tr.odd {
-    td {
-      background-color: rgba(252,212,17,0.1);
-    }
-  }
-  tr.even {
-    td {
-      background-color: inherit;
-    }
-  }
-
-  // Hover stuffs!
-  tr.odd:hover td,
-  tr.even:hover td,
-  tr:hover th {
-    background-color: rgba(252,212,17,0.5);
-  }
-}
-
-.breadcrumb {
-    padding: 8px 15px;
-    margin-bottom: 18px;
-    list-style: none;
-    background-color: rgba(252,212,17,0.5);
-    border-radius: 4px;
-}
-.navbar-default {
-    background-color: #fcd411;
-    border-color: #f0ad4e;
-}
-.input-group-addon {
-    padding: 6px 12px;
-    font-size: 13px;
-    font-weight: normal;
-    line-height: 1;
-    color: #6e6e6e;
-    text-align: center;
-    background-color: #fcd411;
-    border: 1px solid #f0ad4e;
-    border-radius: 4px;
-}
-.list-group-item.active, .list-group-item.active:hover, .list-group-item.active:focus {
-    z-index: 2;
-    color: #fff;
-    background-color: rgba(252,212,17,1);
-    border-color: #428bca;
+.muzi {
+  color: #ffd200
 }

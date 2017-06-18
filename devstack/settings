@@ -1,0 +1,5 @@
+# settings file for aws-dashboard plugin
+enable_service aws-dashboard
+
+# set up default directories
+AWS_DASHBOARD_DIR=${AWS_DASHBOARD_DIR:=$DEST/aws-dashboard}

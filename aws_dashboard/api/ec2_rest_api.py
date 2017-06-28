@@ -1,4 +1,4 @@
-# Copyright 2017 dennis.hong.
+# Copyright 2017 Dennis Hong.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
 from django.views import generic
 from django.utils import http as utils_http
 
-from aws_dashboard.api import ec2
-
 from openstack_dashboard.api.rest import urls
-
 from openstack_dashboard.api.rest import utils as rest_utils
 
+from aws_dashboard.api import ec2
+from aws_dashboard.api import hybrid
 
 LOGICAL_NAME_PATTERN = '[a-zA-Z0-9-._~]+'
 
@@ -47,10 +46,11 @@ class Instances(generic.View):
             instance_id = ec2.create_instance(
                 request,
                 name=request.DATA['name'],
-                image=request.DATA['source_id'],
+                image_id=request.DATA['source_id'],
                 flavor=request.DATA['flavor_id'],
-                key_name='dennis',
-                security_groups=['sg-873597ef', ],
+                key_name=request.DATA['key_name'],
+                security_groups=request.DATA.get('security_groups'),
+                availability_zone=request.DATA.get('availability_zone', None),
                 instance_count=request.DATA['instance_count']
             )
         except KeyError as e:
@@ -66,6 +66,30 @@ class Instances(generic.View):
     @rest_utils.ajax()
     def delete(self, request, server_id):
         ec2.delete_instance(request, server_id)
+
+
+@urls.register
+class ImportInstances(generic.View):
+
+    url_regex = r'aws/ec2/import-instances/$'
+
+    @rest_utils.ajax(data_required=True)
+    def post(self, request):
+        """Import an EC2 instance
+        :param request: HTTP request
+        """
+        try:
+            hybrid.run_import_instance(
+                request,
+                source_type=request.DATA.get('source_type').get('type'),
+                source_id=request.DATA.get('source_id'),
+                leave_original_instance=request.DATA.get('leave_original_instance'),
+                leave_instance_snapshot=request.DATA.get('leave_instance_snapshot')
+            )
+        except KeyError as e:
+            raise rest_utils.AjaxError(400, 'missing required parameter '
+                                            "'%s'" % e.args[0])
+        return rest_utils.CreatedResponse('aws/ec2/instances', {})
 
 
 @urls.register
@@ -92,7 +116,7 @@ class Flavors(generic.View):
     @rest_utils.ajax()
     def get(self, request):
         """Get a list of flavors."""
-        flavors = ec2.list_flavor()
+        flavors = ec2.list_flavor(request)
         return {'items': [f.to_dict() for f in flavors]}
 
 
@@ -115,7 +139,7 @@ class SecurityGroups(generic.View):
 
 @urls.register
 class Keypairs(generic.View):
-    """API for nova keypairs.
+    """API for EC2 keypairs.
     """
     url_regex = r'aws/ec2/keypairs/$'
 
@@ -127,4 +151,36 @@ class Keypairs(generic.View):
         The listing result is an object with property "items".
         """
         result = ec2.list_keypairs(request)
+        return {'items': [u.to_dict() for u in result]}
+
+
+@urls.register
+class Regions(generic.View):
+    """API for EC2 Region.
+    """
+    url_regex = r'aws/ec2/regions/$'
+
+    @rest_utils.ajax()
+    def get(self, request):
+        """Get a list of region.
+
+        The listing result is an object with property "items".
+        """
+        result = ec2.list_regions(request)
+        return {'items': [u.to_dict() for u in result]}
+
+
+@urls.register
+class AvailabilityZones(generic.View):
+    """API for EC2 AvailabilityZones.
+    """
+    url_regex = r'aws/ec2/availability-zones/$'
+
+    @rest_utils.ajax()
+    def get(self, request):
+        """Get a list of AvailabilityZones.
+
+        The listing result is an object with property "items".
+        """
+        result = ec2.list_availability_zones(request)
         return {'items': [u.to_dict() for u in result]}

@@ -40,10 +40,13 @@
 
     var service = {
       createServer: createServer,
+      importServer: importServer,
       getImages: getImages,
       getFlavors: getFlavors,
       getSecurityGroups: getSecurityGroups,
-      getKeypairs: getKeypairs
+      getKeypairs: getKeypairs,
+      getAvailabilityZones: getAvailabilityZones,
+      getRegions: getRegions
     };
 
     return service;
@@ -105,6 +108,27 @@
       return apiService.get('/api/aws/ec2/keypairs/')
         .error(function () {
           toastService.add('error', gettext('Unable to retrieve the keypairs.'));
+        });
+    }
+
+    function importServer(server) {
+      return apiService.post('/api/aws/ec2/import-instances/', server)
+        .error(function () {
+          toastService.add('error', gettext('Unable to import the server.'));
+        });
+    }
+
+    function getRegions() {
+      return apiService.get('/api/aws/ec2/regions/')
+        .error(function () {
+          toastService.add('error', gettext('Unable to retrieve the region.'));
+        });
+    }
+
+    function getAvailabilityZones() {
+      return apiService.get('/api/aws/ec2/availability-zones/')
+        .error(function () {
+          toastService.add('error', gettext('Unable to retrieve the availability zones.'));
         });
     }
 

@@ -1,0 +1,37 @@
+<div ng-controller="ImportEC2InstanceDetailsController as ctrl">
+  <p class="step-description" translate>Please provide the region and availability zone where it will be deployed.</p>
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-8">
+
+      <div class="form-group">
+        <label class="control-label" translate for="regions">Region</label>
+        <div class="alert alert-warning"
+             ng-if="model.regions.length === 0"
+             translate>There are no Regions.</div>
+        <select ng-if="model.regions.length !== 0"
+                class="form-control"
+                id="regions"
+                ng-options="region.value as region.label for region in model.regions"
+                ng-model="model.newInstanceSpec.region">
+        </select>
+      </div>
+
+
+      <div class="form-group">
+        <label class="control-label" translate for="availabilityZones">Availability Zone</label>
+        <div class="alert alert-warning"
+             ng-if="model.availabilityZones.length === 0"
+             translate>There are no Availability Zones.</div>
+        <select ng-if="model.availabilityZones.length !== 0"
+                class="form-control"
+                id="availabilityZones"
+                ng-options="zone.value as zone.label for zone in model.availabilityZones"
+                ng-model="model.newInstanceSpec.availability_zone">
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+</div>

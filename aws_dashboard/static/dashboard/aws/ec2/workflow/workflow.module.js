@@ -25,6 +25,7 @@
    */
   angular
     .module('horizon.dashboard.aws.workflow', [
-      'horizon.dashboard.aws.workflow.launch-instance'
+      'horizon.dashboard.aws.workflow.launch-instance',
+      'horizon.dashboard.aws.workflow.import-instance'
     ]);
 })();

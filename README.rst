@@ -1,7 +1,7 @@
 ================================
 AWS Plugin For OpenStack Horizon
 ================================
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+.. image:: https://img.shields.io/badge/license-Apache%202-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
 
@@ -59,7 +59,7 @@ How To Install
 DevStack Install
 ----------------
 
-Just add this your local.conf::
+Add just one line in your local.conf::
 
     enable_plugin aws-dashboard https://github.com/dennis-hong/aws-dashboard.git stable/newton
 

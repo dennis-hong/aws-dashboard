@@ -3,7 +3,6 @@ AWS Plugin For OpenStack Horizon
 ================================
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg   :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
 
 AWS Plugin For Openstack Horizon

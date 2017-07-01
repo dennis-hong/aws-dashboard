@@ -3,6 +3,7 @@ AWS Plugin For OpenStack Horizon
 ================================
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg   :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
 
 AWS Plugin For Openstack Horizon
@@ -10,7 +11,7 @@ AWS Plugin For Openstack Horizon
 .. image:: https://cloud.githubusercontent.com/assets/23111859/26439340/af7acc86-4162-11e7-89de-48ef89451987.png
 
 How To Install
--------------------------
+--------------
 
 1. Clone this repository::
 
@@ -56,6 +57,13 @@ How To Install
         },
     }
 
+DevStack Install
+----------------
+
+Just add this your local.conf::
+
+    enable_plugin aws-dashboard https://github.com/dennis-hong/aws-dashboard.git stable/newton
+
 Additional Settings
 -------------------
 1. Requires AWS API Key permission
@@ -67,7 +75,7 @@ Additional Settings
      - AmazonS3FullAccess
      - AWSImportExportFullAccess
 
-DOC : http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+ - DOC : http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
 
 2. Installing qemu-utils package is required for image conversion.(qemu-img convert)::
 
@@ -75,7 +83,7 @@ DOC : http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys
     OR
     sudo yum install -y qemu-img
 
-DOC : http://docs.aws.amazon.com/vm-import/latest/userguide/how-vm-import-export-works.html
+ - DOC : http://docs.aws.amazon.com/vm-import/latest/userguide/how-vm-import-export-works.html
 
 
 How To Uninstall

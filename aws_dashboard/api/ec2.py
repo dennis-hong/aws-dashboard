@@ -1,4 +1,4 @@
-# Copyright 2017 dennis.hong.
+# Copyright 2017 Dennis Hong.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,22 +13,25 @@
 # limitations under the License.
 import logging
 import json
+import datetime
 from os import path
-
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
 
 from horizon.utils.memoized import memoized  # noqa
 from openstack_dashboard.api import base
 
+from aws_dashboard.api import utils
+from botocore.exceptions import ClientError
+
 LOG = logging.getLogger(__name__)
+
+logging.getLogger('boto3').setLevel(logging.CRITICAL)
+logging.getLogger('botocore').setLevel(logging.CRITICAL)
+logging.getLogger('nose').setLevel(logging.CRITICAL)
 
 try:
     import boto3
-    from botocore.exceptions import ClientError
 except ImportError:
     LOG.error("import boto3 failed. please pip install boto3")
-    pass
 
 
 class Ec2Instance(base.APIDictWrapper):
@@ -85,13 +88,33 @@ class SecurityGroup(base.APIDictWrapper):
         super(SecurityGroup, self).__init__(apidict)
 
 
-class KeyFair(base.APIDictWrapper):
-    _attrs = ['name', 'key']
+class KeyPair(base.APIDictWrapper):
+    _attrs = ['name', 'fingerprint']
 
     def __init__(self, apidict):
         apidict['name'] = apidict['KeyName']
         apidict['fingerprint'] = apidict['KeyFingerprint']
-        super(KeyFair, self).__init__(apidict)
+        super(KeyPair, self).__init__(apidict)
+
+
+class Region(base.APIDictWrapper):
+    _attrs = ['RegionName', 'Endpoint']
+
+    def __init__(self, apidict):
+        apidict['name'] = apidict['RegionName']
+        apidict['endpoint'] = apidict['Endpoint']
+        super(Region, self).__init__(apidict)
+
+
+class AvailabilityZone(base.APIDictWrapper):
+    _attrs = ['RegionName', 'ZoneName', 'State', 'Messages']
+
+    def __init__(self, apidict):
+        apidict['region_name'] = apidict['RegionName']
+        apidict['zone_name'] = apidict['ZoneName']
+        apidict['state'] = apidict['State']
+        apidict['messages'] = apidict['Messages']
+        super(AvailabilityZone, self).__init__(apidict)
 
 
 def _to_instances(reservations):
@@ -102,13 +125,6 @@ def _to_instances(reservations):
     return instances
 
 
-def _to_images(aws_images):
-    images = []
-    for aws_image in aws_images.get('Images'):
-            images.append(Image(aws_image))
-    return images
-
-
 def _to_instance_types(aws_instance_types):
     instance_types = []
     for k in aws_instance_types.keys():
@@ -116,70 +132,31 @@ def _to_instance_types(aws_instance_types):
     return instance_types
 
 
-def _to_security_groups(aws_sg_list):
-    sg_list = []
-    for aws_sg in aws_sg_list.get('SecurityGroups'):
-        sg_list.append(SecurityGroup(aws_sg))
-    return sg_list
-
-
-def _to_keyfairs(aws_key_list):
-    key_list = []
-    for aws_key in aws_key_list.get('KeyPairs'):
-        key_list.append(KeyFair(aws_key))
-    return key_list
-
-
-def _get_api_keys(project_id):
-    keys_dict = getattr(settings, 'AWS_API_KEY_DICT', {})
-    key_set = keys_dict.get(project_id)
-    _validate_key_set(key_set)
-    return key_set.get('AWS_ACCESS_KEY_ID'), key_set.get('AWS_SECRET_ACCESS_KEY'), key_set.get('AWS_REGION_NAME')
-
-
-def _validate_key_set(key_set):
-    if key_set is None:
-        LOG.error("Not Found AWS API key set.")
-        raise ImproperlyConfigured("AWS API Key Not Found. Please Check in "
-                                   "local_settings.d/_30000_aws_dashboard.py")
-    aws_access_key_id = key_set.get('AWS_ACCESS_KEY_ID', '')
-    aws_secret_access_key = key_set.get('AWS_SECRET_ACCESS_KEY', '')
-    region_name = key_set.get('AWS_REGION_NAME', '')
-    if aws_access_key_id == "" or aws_secret_access_key == "" or region_name == "":
-        LOG.error("aws_access_key_id : %(aws_access_key_id)s "
-                  "aws_secret_access_key : %(aws_secret_access_key)s "
-                  "region_name: %(region_name)s" %
-                  dict(aws_access_key_id=aws_access_key_id,
-                       aws_secret_access_key=aws_secret_access_key,
-                       region_name=region_name))
-        raise ImproperlyConfigured("AWS API Key Not Found. Please Check in "
-                                   "local_settings.d/_30000_aws_dashboard.py")
+def _to_wrapping_list(aws_list, key, wrapper_cls):
+    os_list = []
+    for value in aws_list.get(key):
+        os_list.append(wrapper_cls(value))
+    return os_list
 
 
 @memoized
 def ec2_client(request):
     project_id = request.user.tenant_id
-    aws_access_key_id, aws_secret_access_key, region_name = _get_api_keys(project_id)
-
-    c = boto3.client(
-        'ec2',
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        region_name=region_name)
-    return c
+    aws_access_key_id, aws_secret_access_key, region_name = utils.get_api_keys(project_id)
+    session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
+                                    aws_secret_access_key=aws_secret_access_key,
+                                    region_name=region_name)
+    return session.client('ec2')
 
 
 @memoized
 def ec2_resource(request):
     project_id = request.user.tenant_id
-    aws_access_key_id, aws_secret_access_key, region_name = _get_api_keys(project_id)
-
-    r = boto3.resource(
-        'ec2',
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        region_name=region_name)
-    return r
+    aws_access_key_id, aws_secret_access_key, region_name = utils.get_api_keys(project_id)
+    session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
+                                    aws_secret_access_key=aws_secret_access_key,
+                                    region_name=region_name)
+    return session.resource('ec2')
 
 
 def list_instance(request):
@@ -198,10 +175,7 @@ def get_instance(request, instance_id):
     except ClientError as e:
         LOG.error("Received error: %s", e, exc_info=True)
     instances = _to_instances(reservations)
-    if len(instances) > 0:
-        return instances[0]
-    else:
-        return Ec2Instance()
+    return instances[0]
 
 
 def delete_instance(request, instance_id):
@@ -213,9 +187,10 @@ def delete_instance(request, instance_id):
     return response
 
 
-def create_instance(request, name, image, flavor, key_name, security_groups, instance_count):
+def create_instance(request, name, image_id, flavor, key_name,
+                    security_groups, availability_zone, instance_count=1):
     instance = ec2_resource(request).create_instances(
-        ImageId=image,
+        ImageId=image_id,
         MinCount=instance_count,
         MaxCount=instance_count,
         KeyName=key_name,
@@ -231,7 +206,10 @@ def create_instance(request, name, image, flavor, key_name, security_groups, ins
                     },
                 ]
             },
-        ]
+        ],
+        Placement={
+            'AvailabilityZone': availability_zone,
+        }
     )
     return instance[0].id
 
@@ -260,11 +238,14 @@ def get_images(request):
         )
     except ClientError as e:
         LOG.error("Image List Received error: %s", e, exc_info=True)
-    return _to_images(response)
+    return _to_wrapping_list(response, 'Images', Image)
 
 
-def list_flavor():
+def list_flavor(request):
     """Get the list of available instance type (flavors)."""
+    # TODO(Dennis) : Instance type API is too heavy to call directly.(per region 7MB..) Needs Improvement. T.T
+    # DOC : https://aws.amazon.com/blogs/aws/new-aws-price-list-api/
+    # API : https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20170605233259/ap-northeast-2/index.json
     with open(path.join(path.dirname(path.realpath(__file__)), 'instanceType.json'), 'r') as r:
         rd = json.load(r)
         instance_types = rd
@@ -274,14 +255,14 @@ def list_flavor():
 
 def list_security_groups(request):
     """Get the list of available security groups."""
-    aws_sg_list = ec2_client(request).describe_security_groups()
-    return _to_security_groups(aws_sg_list)
+    response = ec2_client(request).describe_security_groups()
+    return _to_wrapping_list(response, 'SecurityGroups', SecurityGroup)
 
 
 def list_keypairs(request):
     """Get the list of ssh key."""
     response = ec2_client(request).describe_key_pairs()
-    return _to_keyfairs(response)
+    return _to_wrapping_list(response, 'KeyPairs', KeyPair)
 
 
 def start_instance(request, instance_id):
@@ -294,3 +275,51 @@ def stop_instance(request, instance_id):
 
 def reboot_instance(request, instance_id):
     ec2_client(request).reboot_instances(InstanceIds=[instance_id, ])
+
+
+def list_regions(request):
+    """Get the list of region."""
+    response = ec2_client(request).describe_regions()
+    return _to_wrapping_list(response, 'Regions', Region)
+
+
+def list_availability_zones(request):
+    """Get the list of availability zone."""
+    response = ec2_client(request).describe_availability_zones()
+    return _to_wrapping_list(response, 'AvailabilityZones', AvailabilityZone)
+
+
+def import_image_from_s3(request, image_format, bucket_name, object_name, upload_size):
+    """Import Instance Image"""
+    now = datetime.datetime.now()
+    response = ec2_client(request).import_image(
+        Description='import_image',
+        DiskContainers=[
+            {
+                'Description': 'from_s3',
+                'Format': image_format,
+                'UserBucket': {
+                    'S3Bucket': bucket_name,
+                    'S3Key': object_name
+                },
+                'DeviceName': '/dev/sda'
+            },
+        ],
+        LicenseType='BYOL',
+        Hypervisor='xen',
+        Architecture='x86_64',
+        Platform='Linux',
+        ClientData={
+            'UploadStart': now,
+            'UploadEnd': now + datetime.timedelta(days=1),
+            'UploadSize': upload_size,
+            'Comment': 'from_openstack'
+        }
+    )
+    LOG.debug('Import Image_Task : {}', response)
+    return response.get('ImportTaskId')
+
+
+def get_import_image_tasks(request, task_id):
+    response = ec2_client(request).describe_import_image_tasks(ImportTaskIds=[task_id])
+    return response.get('ImportImageTasks')[0]

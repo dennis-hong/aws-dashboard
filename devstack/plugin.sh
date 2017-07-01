@@ -1,6 +1,12 @@
-# plugin.sh - DevStack plugin.sh dispatch script ironic-ui
+# plugin.sh - DevStack plugin.sh dispatch script aws-dashboard
 
 function install_aws_dashboard {
+    # NOTE : workaround for devstack bug: 1540328
+    # where devstack install 'test-requirements' but should not do it
+    # for aws-dashboard project as it installs Horizon from url.
+    # Remove following two 'mv' commands when mentioned bug is fixed.
+    mv $AWS_DASHBOARD_DIR/test-requirements.txt $AWS_DASHBOARD_DIR/_test-requirements.txt
+
     setup_develop ${AWS_DASHBOARD_DIR}
 
     mv $AWS_DASHBOARD_DIR/_test-requirements.txt $AWS_DASHBOARD_DIR/test-requirements.txt

@@ -2,5 +2,7 @@
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
 
+# PBR should always appear first
 pbr>=1.6 # Apache-2.0
-boto3>=1.4.4
+boto3==1.4.4
+botocore==1.5.75

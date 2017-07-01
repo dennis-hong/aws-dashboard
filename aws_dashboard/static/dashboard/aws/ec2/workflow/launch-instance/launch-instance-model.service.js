@@ -219,7 +219,7 @@
         var launchInstanceDefaults = settings.getSetting('LAUNCH_INSTANCE_DEFAULTS');
 
         promise = $q.all([
-          novaAPI.getAvailabilityZones().then(onGetAvailabilityZones, noop),
+          ec2API.getAvailabilityZones().then(onGetAvailabilityZones, noop),
           ec2API.getFlavors().then(onGetFlavors, noop),
           ec2API.getKeypairs().then(onGetKeypairs, noop),
           novaAPI.getLimits(true).then(onGetNovaLimits, noop),
@@ -308,25 +308,22 @@
       push.apply(
         model.availabilityZones,
         data.data.items.filter(function (zone) {
-          return zone.zoneState && zone.zoneState.available;
+          return zone.zone_name && zone.state === 'available';
         })
         .map(function (zone) {
-          return {label: zone.zoneName, value: zone.zoneName};
+          return {label: zone.zone_name, value: zone.zone_name};
         })
       );
 
       if (model.availabilityZones.length === 1) {
         model.newInstanceSpec.availability_zone = model.availabilityZones[0].value;
       } else if (model.availabilityZones.length > 1) {
-        // There are 2 or more; allow ability for nova scheduler to pick,
-        // and make that the default.
         model.availabilityZones.unshift({
           label: gettext("Any Availability Zone"),
           value: ""
         });
         model.newInstanceSpec.availability_zone = model.availabilityZones[0].value;
       }
-
     }
 
     // Flavors

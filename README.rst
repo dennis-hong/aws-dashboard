@@ -1,6 +1,6 @@
-=========
-AWS Plugin For Openstack Horizon
-=========
+================================
+AWS Plugin For OpenStack Horizon
+================================
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
@@ -9,7 +9,7 @@ AWS Plugin For Openstack Horizon
 
 .. image:: https://cloud.githubusercontent.com/assets/23111859/26439340/af7acc86-4162-11e7-89de-48ef89451987.png
 
-HOW TO USE
+How To Install
 -------------------------
 
 1. Clone this repository::
@@ -56,7 +56,31 @@ HOW TO USE
         },
     }
 
-* To uninstall::
+Additional Settings
+-------------------
+1. Requires AWS API Key permission
+
+    1) Go to(AWS IAM Menu) : https://console.aws.amazon.com/iam/home
+
+    2) Requires Permission
+     - AmazonEC2FullAccess
+     - AmazonS3FullAccess
+     - AWSImportExportFullAccess
+
+DOC : http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
+
+2. Installing qemu-utils package is required for image conversion.(qemu-img convert)::
+
+    sudo apt-get install -y qemu-utils
+    OR
+    sudo yum install -y qemu-img
+
+DOC : http://docs.aws.amazon.com/vm-import/latest/userguide/how-vm-import-export-works.html
+
+
+How To Uninstall
+----------------
+::
 
     cd aws-dashboard
     pip uninstall .

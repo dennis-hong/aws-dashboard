@@ -24,9 +24,9 @@
   ImportEC2InstanceCreateKeyPairController.$inject = [
     '$modalInstance',
     'existingKeypairs',
-    'horizon.app.core.openstack-service-api.nova',
+    'horizon.dashboard.aws.aws-service-api.ec2',
     'horizon.framework.widgets.toast.service',
-    'horizon.app.core.openstack-service-api.keypair-download-service'
+    'horizon.dashboard.aws.aws-service-api.keypair-download-service'
   ];
 
   /**
@@ -34,14 +34,14 @@
    * @name ImportEC2InstanceCreateKeyPairController
    * @param {Object} $modalInstance
    * @param {Object} existingKeypairs
-   * @param {Object} nova
+   * @param {Object} ec2API
    * @param {Object} toastService
    * @param {Object} keypairDownloadService
    * @description
    * Provide a dialog for creation of a new key pair.
    * @returns {undefined} Returns nothing
    */
-  function ImportEC2InstanceCreateKeyPairController($modalInstance, existingKeypairs, nova,
+  function ImportEC2InstanceCreateKeyPairController($modalInstance, existingKeypairs, ec2API,
   toastService, keypairDownloadService) {
     var ctrl = this;
 
@@ -86,7 +86,7 @@
     function submit() {
       keypairDownloadService.createAndDownloadKeypair(ctrl.keypair).then(
         function success(createdKeypair) {
-          createdKeypair.regenerateUrl = nova.getRegenerateKeypairUrl(createdKeypair.name);
+          createdKeypair.regenerateUrl = ec2API.getRegenerateKeypairUrl(createdKeypair.name);
           $modalInstance.close(createdKeypair);
         },
         function error() {

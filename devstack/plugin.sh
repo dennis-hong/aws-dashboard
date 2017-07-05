@@ -22,6 +22,12 @@ if is_service_enabled horizon && is_service_enabled aws-dashboard; then
     elif [[ "$1" == "stack" && "$2" == "install" ]]; then
         # Perform installation of service source
         echo_summary "Installing AWS Dashboard"
+        if is_ubuntu; then
+            install_package qemu-utils
+        elif is_fedora || is_suse; then
+            install_package qemu-img
+        fi
+
         install_aws_dashboard
     elif [[ "$1" == "stack" && "$2" == "post-config" ]]; then
         # Configure after the other layer 1 and 2 services have been configured

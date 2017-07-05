@@ -11,15 +11,15 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+import horizon
 from django.utils.translation import ugettext_lazy as _
 
-import horizon
 
 class ComputePanels(horizon.PanelGroup):
     slug = "compute"
     name = _("Compute")
-    panels = ("ec2",)
+    panels = ("ec2", "transport")
+
 
 class Aws(horizon.Dashboard):
     name = _("AWS")

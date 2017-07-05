@@ -11,116 +11,116 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
-import json
 import datetime
+import json
+import logging
 from os import path
+
+import boto3
+from botocore.exceptions import ClientError
 
 from horizon.utils.memoized import memoized  # noqa
 from openstack_dashboard.api import base
 
-from aws_dashboard.api import utils
-from botocore.exceptions import ClientError
+from aws_dashboard.api.hybrid.utils import get_api_keys
+from aws_dashboard.api.hybrid.utils import to_wrapping_list
 
 LOG = logging.getLogger(__name__)
 
-logging.getLogger('boto3').setLevel(logging.CRITICAL)
-logging.getLogger('botocore').setLevel(logging.CRITICAL)
-logging.getLogger('nose').setLevel(logging.CRITICAL)
-
-try:
-    import boto3
-except ImportError:
-    LOG.error("import boto3 failed. please pip install boto3")
+logging.getLogger("boto3").setLevel(logging.CRITICAL)
+logging.getLogger("botocore").setLevel(logging.CRITICAL)
 
 
 class Ec2Instance(base.APIDictWrapper):
-    _attrs = ['id', 'name', 'status',
-              'InstanceId', 'PublicDnsName', 'PrivateDnsName', 'State',
-              'Monitoring', 'EbsOptimized', 'PublicIpAddress', 'PrivateIpAddress',
-              'ProductCodes', 'VpcId', 'KeyName', 'SecurityGroups', 'ClientToken',
-              'SubnetId', 'InstanceType', 'NetworkInterfaces', 'Placement',
-              'Hypervisor', 'BlockDeviceMappings', 'RootDeviceName'
-              'StateTransitionReason', 'ImageId', 'Tags']
+    _attrs = ["id", "name", "instance_type", "image_id", "status", "tenant_id",
+              "InstanceId", "PublicDnsName", "PrivateDnsName", "State",
+              "Monitoring", "EbsOptimized", "PublicIpAddress", "PrivateIpAddress",
+              "ProductCodes", "VpcId", "KeyName", "SecurityGroups", "ClientToken",
+              "SubnetId", "InstanceType", "NetworkInterfaces", "Placement",
+              "Hypervisor", "BlockDeviceMappings", "RootDeviceName"
+              "StateTransitionReason", "ImageId", "Tags"]
 
     def __init__(self, apidict):
+        apidict["id"] = apidict["InstanceId"]
+        apidict["instance_type"] = apidict["InstanceType"]
+        apidict["image_id"] = apidict["ImageId"]
+        apidict["status"] = apidict["State"]["Name"]
+        for tag in apidict.get("Tags"):
+            if tag.get("Key") == "Name":
+                apidict["name"] = tag.get("Value")
+        if apidict.get("name") == "" or apidict.get("name") is None:
+            apidict["name"] = apidict["InstanceId"]
+        apidict["tenant_id"] = "aws_ec2"
         super(Ec2Instance, self).__init__(apidict)
-        self.id = self.InstanceId
-        for tag in self.Tags:
-            if tag["Key"] == "Name":
-                self.name = tag["Value"]
-        if self.name is None:
-            self.name = "No Name"
-        self.status = self.InstanceId
-        self.tenant_id = "aws_ec2"
 
 
 class Image(base.APIDictWrapper):
-    _attrs = ['id', 'Name', 'State', 'Public',
-              'VirtualizationType', 'Hypervisor', 'ImageOwnerAlias', 'EnaSupport',
-              'SriovNetSupport', 'ImageId', 'BlockDeviceMappings', 'Architecture',
-              'ImageLocation', 'RootDeviceType', 'OwnerId', 'RootDeviceName',
-              'CreationDate', 'ImageType', 'Description']
+    _attrs = ["id", "Name", "State", "Public",
+              "VirtualizationType", "Hypervisor", "ImageOwnerAlias", "EnaSupport",
+              "SriovNetSupport", "ImageId", "BlockDeviceMappings", "Architecture",
+              "ImageLocation", "RootDeviceType", "OwnerId", "RootDeviceName",
+              "CreationDate", "ImageType", "Description"]
 
     def __init__(self, apidict):
-        apidict['id'] = apidict['ImageId']
+        apidict["id"] = apidict["ImageId"]
         super(Image, self).__init__(apidict)
 
 
 class InstanceType(base.APIDictWrapper):
-    _attrs = ['id', 'InstanceType', 'vCPU', 'Memory', 'Storage', 'PhysicalProcessor',
-              'ClockSpeed', 'EBS_OPT', 'EnhancedNetworking',
-              'IntelAVX2', 'IntelAVX', 'IntelTurbo', 'NetworkingPerformance']
+    _attrs = ["id", "InstanceType", "vCPU", "Memory", "Storage", "PhysicalProcessor",
+              "ClockSpeed", "EBS_OPT", "EnhancedNetworking",
+              "IntelAVX2", "IntelAVX", "IntelTurbo", "NetworkingPerformance"]
 
     def __init__(self, apidict):
-        apidict['id'] = apidict['InstanceType']
+        apidict["id"] = apidict["InstanceType"]
         super(InstanceType, self).__init__(apidict)
 
 
 class SecurityGroup(base.APIDictWrapper):
-    _attrs = ['id', 'GroupName', 'Description', 'IpPermissions', 'IpRanges',
-              'IpPermissionsEgress', 'Ipv6Ranges', 'EnhancedNetworking',
-              'UserIdGroupPairs', 'VpcId', 'OwnerId', 'GroupId']
+    _attrs = ["id", "GroupName", "Description", "IpPermissions", "IpRanges",
+              "IpPermissionsEgress", "Ipv6Ranges", "EnhancedNetworking",
+              "UserIdGroupPairs", "VpcId", "OwnerId", "GroupId"]
 
     def __init__(self, apidict):
-        apidict['id'] = apidict['GroupId']
-        apidict['security_group_rules'] = apidict['IpPermissions']
+        apidict["id"] = apidict["GroupId"]
+        apidict["security_group_rules"] = apidict["IpPermissions"]
         super(SecurityGroup, self).__init__(apidict)
 
 
 class KeyPair(base.APIDictWrapper):
-    _attrs = ['name', 'fingerprint']
+    _attrs = ["name", "fingerprint"]
 
     def __init__(self, apidict):
-        apidict['name'] = apidict['KeyName']
-        apidict['fingerprint'] = apidict['KeyFingerprint']
+        apidict["name"] = apidict["KeyName"]
+        apidict["fingerprint"] = apidict["KeyFingerprint"]
+        apidict["key_material"] = apidict.get("KeyMaterial", "")
         super(KeyPair, self).__init__(apidict)
 
 
 class Region(base.APIDictWrapper):
-    _attrs = ['RegionName', 'Endpoint']
+    _attrs = ["RegionName", "Endpoint"]
 
     def __init__(self, apidict):
-        apidict['name'] = apidict['RegionName']
-        apidict['endpoint'] = apidict['Endpoint']
+        apidict["name"] = apidict["RegionName"]
+        apidict["endpoint"] = apidict["Endpoint"]
         super(Region, self).__init__(apidict)
 
 
 class AvailabilityZone(base.APIDictWrapper):
-    _attrs = ['RegionName', 'ZoneName', 'State', 'Messages']
+    _attrs = ["RegionName", "ZoneName", "State", "Messages"]
 
     def __init__(self, apidict):
-        apidict['region_name'] = apidict['RegionName']
-        apidict['zone_name'] = apidict['ZoneName']
-        apidict['state'] = apidict['State']
-        apidict['messages'] = apidict['Messages']
+        apidict["region_name"] = apidict["RegionName"]
+        apidict["zone_name"] = apidict["ZoneName"]
+        apidict["state"] = apidict["State"]
+        apidict["messages"] = apidict["Messages"]
         super(AvailabilityZone, self).__init__(apidict)
 
 
 def _to_instances(reservations):
     instances = []
     for reservation in reservations:
-        for ec2_instance in reservation.get('Instances'):
+        for ec2_instance in reservation.get("Instances"):
             instances.append(Ec2Instance(ec2_instance))
     return instances
 
@@ -132,59 +132,43 @@ def _to_instance_types(aws_instance_types):
     return instance_types
 
 
-def _to_wrapping_list(aws_list, key, wrapper_cls):
-    os_list = []
-    for value in aws_list.get(key):
-        os_list.append(wrapper_cls(value))
-    return os_list
-
-
 @memoized
 def ec2_client(request):
     project_id = request.user.tenant_id
-    aws_access_key_id, aws_secret_access_key, region_name = utils.get_api_keys(project_id)
+    aws_access_key_id, aws_secret_access_key, region_name = get_api_keys(project_id)
     session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
                                     aws_secret_access_key=aws_secret_access_key,
                                     region_name=region_name)
-    return session.client('ec2')
+    return session.client("ec2")
 
 
 @memoized
 def ec2_resource(request):
     project_id = request.user.tenant_id
-    aws_access_key_id, aws_secret_access_key, region_name = utils.get_api_keys(project_id)
+    aws_access_key_id, aws_secret_access_key, region_name = get_api_keys(project_id)
     session = boto3.session.Session(aws_access_key_id=aws_access_key_id,
                                     aws_secret_access_key=aws_secret_access_key,
                                     region_name=region_name)
-    return session.resource('ec2')
+    return session.resource("ec2")
 
 
 def list_instance(request):
-    reservations = ec2_client(request).describe_instances().get('Reservations')
-    instances = _to_instances(reservations)
-    return instances
+    reservations = ec2_client(request).describe_instances().get("Reservations")
+    return _to_instances(reservations)
 
 
 def get_instance(request, instance_id):
-    reservations = None
-    try:
-        # TODO: change to use ec2_resource(request)
-        reservations = ec2_client(request).describe_instances(
-            InstanceIds=[instance_id, ]
-        ).get('Reservations')
-    except ClientError as e:
-        LOG.error("Received error: %s", e, exc_info=True)
+    # TODO: change to use ec2_resource(request)
+    reservations = ec2_client(request).describe_instances(
+        InstanceIds=[instance_id]
+    ).get("Reservations")
     instances = _to_instances(reservations)
     return instances[0]
 
 
 def delete_instance(request, instance_id):
-    response = ec2_client(request).terminate_instances(
-        InstanceIds=[
-            instance_id,
-        ]
-    )
-    return response
+    LOG.debug('Delete EC2 Instance : %s' % instance_id)
+    return ec2_client(request).terminate_instances(InstanceIds=[instance_id])
 
 
 def create_instance(request, name, image_id, flavor, key_name,
@@ -198,17 +182,17 @@ def create_instance(request, name, image_id, flavor, key_name,
         InstanceType=flavor,
         TagSpecifications=[
             {
-                'ResourceType': 'instance',
-                'Tags': [
+                "ResourceType": "instance",
+                "Tags": [
                     {
-                        'Key': 'Name',
-                        'Value': name
+                        "Key": "Name",
+                        "Value": name
                     },
                 ]
             },
         ],
         Placement={
-            'AvailabilityZone': availability_zone,
+            "AvailabilityZone": availability_zone,
         }
     )
     return instance[0].id
@@ -220,25 +204,27 @@ def get_images(request):
         response = ec2_client(request).describe_images(
             Filters=[
                 {
-                    'Name': 'name',
-                    'Values': [
-                        'RHEL-7.2*',
-                        'suse-sles-12-*',
-                        'ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*',
-                        'amzn-ami-hvm-*',
+                    "Name": "name",
+                    "Values": [
+                        "RHEL-7.2*",
+                        "suse-sles-12-*",
+                        "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*",
+                        "amzn-ami-hvm-*",
+                        "import*",
+                        "export*",
                     ]
                 },
                 {
-                    'Name': 'state',
-                    'Values': [
-                        'available',
+                    "Name": "state",
+                    "Values": [
+                        "available",
                     ]
                 },
             ]
         )
     except ClientError as e:
         LOG.error("Image List Received error: %s", e, exc_info=True)
-    return _to_wrapping_list(response, 'Images', Image)
+    return to_wrapping_list(response, "Images", Image)
 
 
 def list_flavor(request):
@@ -246,7 +232,7 @@ def list_flavor(request):
     # TODO(Dennis) : Instance type API is too heavy to call directly.(per region 7MB..) Needs Improvement. T.T
     # DOC : https://aws.amazon.com/blogs/aws/new-aws-price-list-api/
     # API : https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/20170605233259/ap-northeast-2/index.json
-    with open(path.join(path.dirname(path.realpath(__file__)), 'instanceType.json'), 'r') as r:
+    with open(path.join(path.dirname(path.realpath(__file__)), "instanceType.json"), "r") as r:
         rd = json.load(r)
         instance_types = rd
         r.close()
@@ -256,13 +242,28 @@ def list_flavor(request):
 def list_security_groups(request):
     """Get the list of available security groups."""
     response = ec2_client(request).describe_security_groups()
-    return _to_wrapping_list(response, 'SecurityGroups', SecurityGroup)
+    return to_wrapping_list(response, "SecurityGroups", SecurityGroup)
 
 
 def list_keypairs(request):
     """Get the list of ssh key."""
     response = ec2_client(request).describe_key_pairs()
-    return _to_wrapping_list(response, 'KeyPairs', KeyPair)
+    return to_wrapping_list(response, "KeyPairs", KeyPair)
+
+
+def create_keypair(request, key_name):
+    """create ssh key."""
+    response = ec2_client(request).create_key_pair(KeyName=key_name)
+    return KeyPair(response)
+
+
+def import_keypair(request, key_name, public_key):
+    """create ssh key."""
+    response = ec2_client(request).import_key_pair(
+        KeyName=key_name,
+        PublicKeyMaterial=public_key
+    )
+    return KeyPair(response)
 
 
 def start_instance(request, instance_id):
@@ -280,46 +281,55 @@ def reboot_instance(request, instance_id):
 def list_regions(request):
     """Get the list of region."""
     response = ec2_client(request).describe_regions()
-    return _to_wrapping_list(response, 'Regions', Region)
+    return to_wrapping_list(response, "Regions", Region)
 
 
 def list_availability_zones(request):
     """Get the list of availability zone."""
     response = ec2_client(request).describe_availability_zones()
-    return _to_wrapping_list(response, 'AvailabilityZones', AvailabilityZone)
+    return to_wrapping_list(response, "AvailabilityZones", AvailabilityZone)
 
 
 def import_image_from_s3(request, image_format, bucket_name, object_name, upload_size):
     """Import Instance Image"""
     now = datetime.datetime.now()
     response = ec2_client(request).import_image(
-        Description='import_image',
+        Description=object_name,
         DiskContainers=[
             {
-                'Description': 'from_s3',
-                'Format': image_format,
-                'UserBucket': {
-                    'S3Bucket': bucket_name,
-                    'S3Key': object_name
+                "Description": object_name,
+                "Format": image_format,
+                "UserBucket": {
+                    "S3Bucket": bucket_name,
+                    "S3Key": object_name
                 },
-                'DeviceName': '/dev/sda'
+                "DeviceName": "/dev/sda"
             },
         ],
-        LicenseType='BYOL',
-        Hypervisor='xen',
-        Architecture='x86_64',
-        Platform='Linux',
+        LicenseType="BYOL",
+        Hypervisor="xen",
+        Architecture="x86_64",
+        Platform="Linux",
         ClientData={
-            'UploadStart': now,
-            'UploadEnd': now + datetime.timedelta(days=1),
-            'UploadSize': upload_size,
-            'Comment': 'from_openstack'
+            "UploadStart": now,
+            "UploadEnd": now + datetime.timedelta(days=1),
+            "UploadSize": upload_size,
+            "Comment": "from_openstack"
         }
     )
-    LOG.debug('Import Image_Task : {}', response)
-    return response.get('ImportTaskId')
+    LOG.debug("Import Image_Task : {}".format(response))
+    return response.get("ImportTaskId")
 
 
-def get_import_image_tasks(request, task_id):
-    response = ec2_client(request).describe_import_image_tasks(ImportTaskIds=[task_id])
-    return response.get('ImportImageTasks')[0]
+def export_instance_to_s3(request, instance_id, bucket_name, instance_name=""):
+    """Export Instance To OpenStack"""
+    task = ec2_client(request).create_instance_export_task(
+        Description=instance_name,
+        ExportToS3Task={
+            "DiskImageFormat": "vmdk",
+            "S3Bucket": bucket_name
+        },
+        InstanceId=instance_id,
+        TargetEnvironment="vmware"
+    )
+    return task.get("ExportTask").get("ExportTaskId")

@@ -7,7 +7,7 @@
   <div class="row">
     <div class="col-xs-6">
       <div class="form-group" ng-class="{ 'has-error': importInstanceSourceForm.boot-source-type.$invalid }">
-        <label for="boot-source-type" class="control-label" translate>Select Import Source</label>
+        <label for="boot-source-type" class="control-label" translate>Select Import Source Type</label>
         <select name="boot-source-type" class="form-control" id="boot-source-type"
                 ng-options="src.label for src in model.allowedBootSources| orderBy:'label' track by src.type"
                 ng-change="ctrl.updateBootSourceSelection(model.newInstanceSpec.source_type.type)"

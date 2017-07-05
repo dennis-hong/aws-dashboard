@@ -84,6 +84,10 @@ Additional Settings
 
  - DOC : http://docs.aws.amazon.com/vm-import/latest/userguide/how-vm-import-export-works.html
 
+3. (Optional) Nova-compute's 'injected_network_template' setting is required
+   to revert the interface settings that AWS modified when importing instances.
+   *If your VM interface name is 'eht0' in your OpenStack environment, you do not need this setting.
+
 
 How To Uninstall
 ----------------

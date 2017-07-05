@@ -23,7 +23,7 @@
 
   LaunchEC2InstanceImportKeyPairController.$inject = [
     '$modalInstance',
-    'horizon.app.core.openstack-service-api.nova',
+    'horizon.dashboard.aws.aws-service-api.ec2',
     'horizon.framework.widgets.toast.service',
     'horizon.dashboard.aws.workflow.launch-instance.basePath'
   ];
@@ -32,14 +32,14 @@
    * @ngdoc controller
    * @name LaunchEC2InstanceImportKeyPairController
    * @param {Object} $modalInstance
-   * @param {Object} novaAPI
+   * @param {Object} ec2API
    * @param {Object} toastService
    * @param {string} basePath
    * @description
    * Provide a dialog for import of an existing ssh public key.
    * @returns {undefined} Returns nothing
    */
-  function LaunchEC2InstanceImportKeyPairController($modalInstance, novaAPI, toastService, basePath) {
+  function LaunchEC2InstanceImportKeyPairController($modalInstance, ec2API, toastService, basePath) {
     var ctrl = this;
 
     ctrl.submit = submit;
@@ -50,7 +50,7 @@
     //////////
 
     function submit() {
-      novaAPI.createKeypair(ctrl.model).then(successCallback);
+      ec2API.createKeypair(ctrl.model).then(successCallback);
     }
 
     function successCallback(data) {

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Transport Tasks" %}{% endblock %}
+
+{% block breadcrumb_nav %}
+  <ol class="breadcrumb">
+    <li>{% trans "AWS" %}</li>
+    <li>{% trans "Compute" %}</li>
+    <li class="active">{% trans "Transport Tasks" %}</li>
+  </ol>
+{% endblock %}
+
+{% block main %}
+  {{ table.render }}
+{% endblock %}

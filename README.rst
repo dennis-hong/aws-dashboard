@@ -1,7 +1,7 @@
 ================================
 AWS Plugin For OpenStack Horizon
 ================================
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+.. image:: https://img.shields.io/badge/license-Apache%202-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
 
@@ -59,7 +59,7 @@ How To Install
 DevStack Install
 ----------------
 
-Just add this your local.conf::
+Add just one line in your local.conf::
 
     enable_plugin aws-dashboard https://github.com/dennis-hong/aws-dashboard.git stable/newton
 
@@ -83,6 +83,10 @@ Additional Settings
     sudo yum install -y qemu-img
 
  - DOC : http://docs.aws.amazon.com/vm-import/latest/userguide/how-vm-import-export-works.html
+
+3. (Optional) Nova-compute's 'injected_network_template' setting is required
+   to revert the interface settings that AWS modified when importing instances.
+   *If your VM interface name is 'eht0' in your OpenStack environment, you do not need this setting.
 
 
 How To Uninstall

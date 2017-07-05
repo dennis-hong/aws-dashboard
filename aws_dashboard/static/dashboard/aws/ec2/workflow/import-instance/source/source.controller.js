@@ -297,7 +297,7 @@
         $scope.initPromise.then(function () {
           $scope.$applyAsync(function () {
             if ($scope.launchContext.imageId) {
-              setSourceImageSnapshotWithId($scope.launchContext.imageId);
+              setSourceImageSnapshotWithId($scope.exportContext.imageId);
             }
           });
         });

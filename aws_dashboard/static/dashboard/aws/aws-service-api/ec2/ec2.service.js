@@ -41,10 +41,15 @@
     var service = {
       createServer: createServer,
       importServer: importServer,
+      exportServer: exportServer,
+      getServers: getServers,
       getImages: getImages,
       getFlavors: getFlavors,
       getSecurityGroups: getSecurityGroups,
       getKeypairs: getKeypairs,
+      getCreateKeypairUrl: getCreateKeypairUrl,
+      getRegenerateKeypairUrl: getRegenerateKeypairUrl,
+      createKeypair: createKeypair,
       getAvailabilityZones: getAvailabilityZones,
       getRegions: getRegions
     };
@@ -81,6 +86,14 @@
         });
     }
 
+    function getServers(params) {
+      var config = params ? { 'params' : params} : {};
+      return apiService.get('/api/aws/ec2/instances/', config)
+        .error(function () {
+          toastService.add('error', gettext('Unable to retrieve the instances.'));
+        });
+    }
+
     function getImages(params) {
       var config = params ? { 'params' : params} : {};
       return apiService.get('/api/aws/ec2/images/', config)
@@ -111,10 +124,34 @@
         });
     }
 
+    function getRegenerateKeypairUrl(keyPairName) {
+      return getCreateKeypairUrl(keyPairName) + "?regenerate=true";
+    }
+
+    function getCreateKeypairUrl(keyPairName) {
+      // NOTE: WEBROOT by definition must end with a slash (local_settings.py).
+      return $window.WEBROOT + "api/aws/ec2/keypairs/" +
+        encodeURIComponent(keyPairName) + "/";
+    }
+
+    function createKeypair(key_pair) {
+      return apiService.post('/api/aws/ec2/keypairs/', key_pair)
+        .error(function () {
+          toastService.add('error', gettext('Unable to create the keypairs.'));
+        });
+    }
+
     function importServer(server) {
       return apiService.post('/api/aws/ec2/import-instances/', server)
         .error(function () {
           toastService.add('error', gettext('Unable to import the server.'));
+        });
+    }
+
+    function exportServer(server) {
+      return apiService.post('/api/aws/ec2/export-instances/', server)
+        .error(function () {
+          toastService.add('error', gettext('Unable to export the server.'));
         });
     }
 

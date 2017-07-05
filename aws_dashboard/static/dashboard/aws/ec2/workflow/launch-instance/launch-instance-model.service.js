@@ -19,16 +19,10 @@
   launchEC2InstanceModel.$inject = [
     '$q',
     '$log',
-    'horizon.app.core.openstack-service-api.cinder',
-    'horizon.app.core.openstack-service-api.glance',
     'horizon.app.core.openstack-service-api.nova',
-    'horizon.app.core.openstack-service-api.novaExtensions',
-    'horizon.app.core.openstack-service-api.serviceCatalog',
     'horizon.app.core.openstack-service-api.settings',
     'horizon.dashboard.aws.workflow.launch-instance.boot-source-types',
     'horizon.framework.widgets.toast.service',
-    'horizon.app.core.openstack-service-api.policy',
-    'horizon.dashboard.aws.workflow.launch-instance.step-policy',
     'horizon.dashboard.aws.aws-service-api.ec2'
   ];
 
@@ -38,16 +32,10 @@
    *
    * @param {Object} $q
    * @param {Object} $log
-   * @param {Object} cinderAPI
-   * @param {Object} glanceAPI
    * @param {Object} novaAPI
-   * @param {Object} novaExtensions
-   * @param {Object} serviceCatalog
    * @param {Object} settings
    * @param {Object} bootSourceTypes
    * @param {Object} toast
-   * @param {Object} policy
-   * @param {Object} stepPolicy
    * @param {Object} ec2API
    * @description
    * This is the M part in MVC design pattern for launch instance
@@ -61,16 +49,10 @@
   function launchEC2InstanceModel(
     $q,
     $log,
-    cinderAPI,
-    glanceAPI,
     novaAPI,
-    novaExtensions,
-    serviceCatalog,
     settings,
     bootSourceTypes,
     toast,
-    policy,
-    stepPolicy,
     ec2API
   ) {
 
@@ -225,8 +207,7 @@
           novaAPI.getLimits(true).then(onGetNovaLimits, noop),
           ec2API.getSecurityGroups().then(onGetSecurityGroups, noop),
           launchInstanceDefaults.then(addImageSourcesIfEnabled, noop),
-          launchInstanceDefaults.then(setDefaultValues, noop),
-          launchInstanceDefaults.then(addVolumeSourcesIfEnabled, noop)
+          launchInstanceDefaults.then(setDefaultValues, noop)
         ]);
 
         promise.then(onInitSuccess, onInitFail);
@@ -238,11 +219,6 @@
     function onInitSuccess() {
       model.initializing = false;
       model.initialized = true;
-      // This provides supplemental data non-critical to launching
-      // an instance.  Therefore we load it only if the critical data
-      // all loads successfully.
-      getServerGroups();
-      getMetadataDefinitions();
     }
 
     function onInitFail() {
@@ -277,9 +253,6 @@
       setFinalSpecFlavor(finalSpec);
       setFinalSpecKeyPairs(finalSpec);
       setFinalSpecSecurityGroups(finalSpec);
-      setFinalSpecServerGroup(finalSpec);
-      setFinalSpecSchedulerHints(finalSpec);
-      setFinalSpecMetadata(finalSpec);
 
       return ec2API.createServer(finalSpec).then(successMessage);
     }
@@ -389,26 +362,6 @@
       finalSpec.security_groups = securityGroupIds;
     }
 
-    // Server Groups
-
-    function getServerGroups() {
-      if (policy.check(stepPolicy.serverGroups)) {
-        return novaAPI.getServerGroups().then(onGetServerGroups, noop);
-      }
-    }
-
-    function onGetServerGroups(data) {
-      model.serverGroups.length = 0;
-      push.apply(model.serverGroups, data.data.items);
-    }
-
-    function setFinalSpecServerGroup(finalSpec) {
-      if (finalSpec.server_groups.length > 0) {
-        finalSpec.scheduler_hints.group = finalSpec.server_groups[0].id;
-      }
-      delete finalSpec.server_groups;
-    }
-
     function addImageSourcesIfEnabled(config) {
       // in case settings are deleted or not present
       var allEnabled = !config;
@@ -426,62 +379,6 @@
           }
         });
       }
-    }
-
-    function addVolumeSourcesIfEnabled(config) {
-      var volumeDeferred = $q.defer();
-      var volumeSnapshotDeferred = $q.defer();
-      serviceCatalog
-        .ifTypeEnabled('volume')
-        .then(onVolumeServiceEnabled, resolvePromises);
-      function onVolumeServiceEnabled() {
-        model.volumeBootable = true;
-        novaExtensions
-          .ifNameEnabled('BlockDeviceMappingV2Boot')
-          .then(onBootToVolumeSupported);
-        if (!config || !config.disable_volume) {
-          getVolumes().then(resolveVolumes, failVolumes);
-        } else {
-          resolveVolumes();
-        }
-        if (!config || !config.disable_volume_snapshot) {
-          getVolumeSnapshots().then(resolveVolumeSnapshots, failVolumeSnapshots);
-        } else {
-          resolveVolumeSnapshots();
-        }
-      }
-      function onBootToVolumeSupported() {
-        model.allowCreateVolumeFromImage = true;
-      }
-      function getVolumes() {
-        return cinderAPI.getVolumes({status: 'available', bootable: 1})
-          .then(onGetVolumes);
-      }
-      function getVolumeSnapshots() {
-        return cinderAPI.getVolumeSnapshots({status: 'available'})
-          .then(onGetVolumeSnapshots);
-      }
-      function resolvePromises() {
-        volumeDeferred.resolve();
-        volumeSnapshotDeferred.resolve();
-      }
-      function resolveVolumes() {
-        volumeDeferred.resolve();
-      }
-      function failVolumes() {
-        volumeDeferred.resolve();
-      }
-      function resolveVolumeSnapshots() {
-        volumeSnapshotDeferred.resolve();
-      }
-      function failVolumeSnapshots() {
-        volumeSnapshotDeferred.resolve();
-      }
-      return $q.all(
-        [
-          volumeDeferred.promise,
-          volumeSnapshotDeferred.promise
-        ]);
     }
 
     function isBootableImageType(image) {
@@ -513,22 +410,6 @@
       );
     }
 
-    function onGetVolumes(data) {
-      model.volumes.length = 0;
-      push.apply(model.volumes, data.data.items);
-      addAllowedBootSource(model.volumes, bootSourceTypes.VOLUME, gettext('Volume'));
-    }
-
-    function onGetVolumeSnapshots(data) {
-      model.volumeSnapshots.length = 0;
-      push.apply(model.volumeSnapshots, data.data.items);
-      addAllowedBootSource(
-        model.volumeSnapshots,
-        bootSourceTypes.VOLUME_SNAPSHOT,
-        gettext('Volume Snapshot')
-      );
-    }
-
     function addAllowedBootSource(rawTypes, type, label) {
       if (rawTypes) {
         model.allowedBootSources.push({
@@ -541,143 +422,13 @@
     function setFinalSpecBootsource(finalSpec) {
       finalSpec.source_id = finalSpec.source && finalSpec.source[0] && finalSpec.source[0].id;
       delete finalSpec.source;
-
-      switch (finalSpec.source_type.type) {
-        case bootSourceTypes.IMAGE:
-          setFinalSpecBootImageToVolume(finalSpec);
-          break;
-        case bootSourceTypes.INSTANCE_SNAPSHOT:
-          setFinalSpecBootImageToVolume(finalSpec);
-          break;
-        case bootSourceTypes.VOLUME:
-          setFinalSpecBootFromVolumeDevice(finalSpec, 'vol');
-          break;
-        case bootSourceTypes.VOLUME_SNAPSHOT:
-          setFinalSpecBootFromVolumeDevice(finalSpec, 'snap');
-          break;
-        default:
-          $log.error("Unknown source type: " + finalSpec.source_type);
-      }
-
-      // The following are all fields gathered into simple fields by
-      // steps so that the view can simply bind to simple model attributes
-      // that are then transformed a single time to Nova's expectation
-      // at launch time.
       delete finalSpec.source_type;
-      delete finalSpec.vol_create;
-      delete finalSpec.vol_device_name;
-      delete finalSpec.vol_delete_on_instance_delete;
-      delete finalSpec.vol_size;
-    }
-
-    function setFinalSpecBootImageToVolume(finalSpec) {
-      if (finalSpec.vol_create) {
-        // Specify null to get Autoselection (not empty string)
-        var deviceName = finalSpec.vol_device_name ? finalSpec.vol_device_name : null;
-        finalSpec.block_device_mapping_v2 = [];
-        finalSpec.block_device_mapping_v2.push(
-          {
-            'device_name': deviceName,
-            'source_type': bootSourceTypes.IMAGE,
-            'destination_type': bootSourceTypes.VOLUME,
-            'delete_on_termination': finalSpec.vol_delete_on_instance_delete,
-            'uuid': finalSpec.source_id,
-            'boot_index': '0',
-            'volume_size': finalSpec.vol_size
-          }
-        );
-        finalSpec.source_id = null;
-      }
-    }
-
-    function setFinalSpecBootFromVolumeDevice(finalSpec, sourceType) {
-      finalSpec.block_device_mapping = {};
-      finalSpec.block_device_mapping[finalSpec.vol_device_name] = [
-        finalSpec.source_id,
-        ':',
-        sourceType,
-        '::',
-        finalSpec.vol_delete_on_instance_delete
-      ].join('');
-
-      // Source ID must be empty for API
-      finalSpec.source_id = '';
     }
 
     // Nova Limits
 
     function onGetNovaLimits(data) {
       angular.extend(model.novaLimits, data.data);
-    }
-
-    // Scheduler hints
-
-    function setFinalSpecSchedulerHints(finalSpec) {
-      if (model.hintsTree) {
-        var hints = model.hintsTree.getExisting();
-        if (!angular.equals({}, hints)) {
-          angular.forEach(hints, function(value, key) {
-            finalSpec.scheduler_hints[key] = value + '';
-          });
-        }
-      }
-    }
-
-    // Instance metadata
-
-    function setFinalSpecMetadata(finalSpec) {
-      if (model.metadataTree) {
-        var meta = model.metadataTree.getExisting();
-        if (!angular.equals({}, meta)) {
-          angular.forEach(meta, function(value, key) {
-            meta[key] = value + '';
-          });
-          finalSpec.meta = meta;
-        }
-      }
-    }
-
-    // Metadata Definitions
-
-    /**
-     * Metadata definitions provide supplemental information in source image detail
-     * rows and are used on the metadata tab for adding metadata to the instance and
-     * on the scheduler hints tab.
-     */
-    function getMetadataDefinitions() {
-      // Metadata definitions often apply to multiple resource types. It is optimal to make a
-      // single request for all desired resource types.
-      //   <key>: [<resource_type>, <properties_target>]
-      var resourceTypes = {
-        flavor: ['OS::Nova::Flavor', ''],
-        image: ['OS::Glance::Image', ''],
-        volume: ['OS::Cinder::Volumes', ''],
-        instance: ['OS::Nova::Server', 'metadata']
-      };
-
-      angular.forEach(resourceTypes, applyForResourceType);
-
-      // Need to check setting and policy for scheduler hints
-      $q.all([
-        settings.ifEnabled('LAUNCH_INSTANCE_DEFAULTS.enable_scheduler_hints', true, true),
-        policy.ifAllowed(stepPolicy.schedulerHints)
-      ]).then(function getSchedulerHints() {
-        applyForResourceType(['OS::Nova::Server', 'scheduler_hints'], 'hints');
-      });
-    }
-
-    function applyForResourceType(resourceType, key) {
-      glanceAPI
-        .getNamespaces({ resource_type: resourceType[0],
-                         properties_target: resourceType[1] }, true)
-        .then(function(data) {
-          var namespaces = data.data.items;
-          // This will ensure that the metaDefs model object remains
-          // unchanged until metadefs are fully loaded. Otherwise,
-          // partial results are loaded and can result in some odd
-          // display behavior.
-          model.metadataDefs[key] = namespaces;
-        });
     }
 
     return model;

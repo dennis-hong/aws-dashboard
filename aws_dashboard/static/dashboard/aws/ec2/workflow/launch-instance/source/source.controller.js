@@ -37,7 +37,6 @@
     'dateFilter',
     'decodeFilter',
     'diskFormatFilter',
-    'gbFilter',
     'horizon.dashboard.aws.workflow.launch-instance.basePath',
     'horizon.framework.widgets.transfer-table.events',
     'horizon.framework.widgets.magic-search.events'
@@ -49,7 +48,6 @@
     dateFilter,
     decodeFilter,
     diskFormatFilter,
-    gbFilter,
     basePath,
     events,
     magicSearchEvents
@@ -100,18 +98,6 @@
         allocated: selection,
         displayedAvailable: [],
         displayedAllocated: selection
-      },
-      volume: {
-        available: $scope.model.volumes,
-        allocated: selection,
-        displayedAvailable: [],
-        displayedAllocated: selection
-      },
-      volume_snapshot: {
-        available: $scope.model.volumeSnapshots,
-        allocated: selection,
-        displayedAvailable: [],
-        displayedAllocated: selection
       }
     };
 
@@ -145,20 +131,6 @@
         { text: gettext('Size'), classList: ['number'], sortable: true },
         { text: gettext('Type'), sortable: true },
         { text: gettext('Visibility'), sortable: true }
-      ],
-      volume: [
-        { text: gettext('Name'), sortable: true, sortDefault: true },
-        { text: gettext('Description'), sortable: true },
-        { text: gettext('Size'), classList: ['number'], sortable: true },
-        { text: gettext('Type'), sortable: true },
-        { text: gettext('Availability Zone'), sortable: true }
-      ],
-      volume_snapshot: [
-        { text: gettext('Name'), sortable: true, sortDefault: true },
-        { text: gettext('Description'), sortable: true },
-        { text: gettext('Size'), classList: ['number'], sortable: true },
-        { text: gettext('Created'), sortable: true },
-        { text: gettext('Status'), sortable: true }
       ]
     };
 
@@ -181,20 +153,6 @@
         { key: 'size', filter: bytesFilter, classList: ['number'] },
         { key: 'disk_format', filter: diskFormatFilter, filterRawData: true },
         { key: 'is_public', filter: decodeFilter, filterArg: _visibilitymap }
-      ],
-      volume: [
-        { key: 'name', classList: ['hi-light', 'word-break'] },
-        { key: 'description' },
-        { key: 'size', filter: gbFilter, classList: ['number'] },
-        { key: 'volume_image_metadata', filter: diskFormatFilter },
-        { key: 'availability_zone' }
-      ],
-      volume_snapshot: [
-        { key: 'name', classList: ['hi-light', 'word-break'] },
-        { key: 'description' },
-        { key: 'size', filter: gbFilter, classList: ['number'] },
-        { key: 'created_at', filter: dateFilter, filterArg: 'short' },
-        { key: 'status' }
       ]
     };
 
@@ -214,15 +172,6 @@
         label: gettext('Description'),
         name: 'description',
         singleton: true
-      },
-      encrypted: {
-        label: gettext('Encrypted'),
-        name: 'encrypted',
-        singleton: true,
-        options: [
-          { label: gettext('Yes'), key: 'true' },
-          { label: gettext('No'), key: 'false' }
-        ]
       },
       name: {
         label: gettext('Name'),
@@ -281,12 +230,6 @@
       ],
       snapshot: [
         facets.name, facets.updated, facets.size, facets.type, facets.visibility
-      ],
-      volume: [
-        facets.name, facets.description, facets.size, facets.volumeType, facets.encrypted
-      ],
-      volume_snapshot: [
-        facets.name, facets.description, facets.size, facets.created, facets.status
       ]
     };
 
@@ -301,14 +244,6 @@
       }
     );
 
-    var allocatedWatcher = $scope.$watch(
-      function () {
-        return ctrl.tableData.allocated.length;
-      },
-      function (newValue) {
-        checkVolumeForImage(newValue);
-      }
-    );
 
     // Since available transfer table for Launch Instance Source step is
     // dynamically selected based on Boot Source, we need to update the
@@ -357,36 +292,6 @@
       }
     );
 
-    var volumeWatcher = $scope.$watchCollection(
-      function getVolumes() {
-        return $scope.model.volumes;
-      },
-      function onVolumesChange() {
-        $scope.initPromise.then(function onInit() {
-          $scope.$applyAsync(function setDefaultVolume() {
-            if ($scope.launchContext.volumeId) {
-              setSourceVolumeWithId($scope.launchContext.volumeId);
-            }
-          });
-        });
-      }
-    );
-
-    var snapshotWatcher = $scope.$watchCollection(
-      function getSnapshots() {
-        return $scope.model.volumeSnapshots;
-      },
-      function onSnapshotsChange() {
-        $scope.initPromise.then(function onInit() {
-          $scope.$applyAsync(function setDefaultSnapshot() {
-            if ($scope.launchContext.snapshotId) {
-              setSourceSnapshotWithId($scope.launchContext.snapshotId);
-            }
-          });
-        });
-      }
-    );
-
     // When the allowedboot list changes, change the source_type
     // and update the table for the new source selection. Only done
     // with the first item for the list
@@ -407,27 +312,17 @@
     $scope.$on('$destroy', function() {
       allowedBootSourcesWatcher();
       newSpecWatcher();
-      allocatedWatcher();
       bootSourceWatcher();
       imagesWatcher();
       imageSnapshotsWatcher();
-      volumeWatcher();
-      snapshotWatcher();
     });
 
     ////////////////////
 
     function updateBootSourceSelection(selectedSource) {
       ctrl.currentBootSource = selectedSource;
-      if ((selectedSource === bootSourceTypes.IMAGE ||
-           selectedSource === bootSourceTypes.INSTANCE_SNAPSHOT) && $scope.model.volumeBootable) {
-        $scope.model.newInstanceSpec.vol_create = true;
-      } else {
-        $scope.model.newInstanceSpec.vol_create = false;
-      }
-      $scope.model.newInstanceSpec.vol_delete_on_instance_delete = false;
+
       changeBootSource(selectedSource);
-      validateBootSourceType();
     }
 
     // Dynamically update page based on boot source selection
@@ -479,46 +374,6 @@
      * Validation
      */
 
-    /*
-     * If boot source type is 'image' and 'Create New Volume' is checked, set the minimum volume
-     * size for validating vol_size field
-     */
-    function checkVolumeForImage() {
-      var source = selection[0];
-
-      if (source && ctrl.currentBootSource === bootSourceTypes.IMAGE) {
-        var imageGb = source.size * 1e-9;
-        var imageDisk = source.min_disk;
-        ctrl.minVolumeSize = Math.ceil(Math.max(imageGb, imageDisk));
-        if ($scope.model.newInstanceSpec.vol_size < ctrl.minVolumeSize) {
-          $scope.model.newInstanceSpec.vol_size = ctrl.minVolumeSize;
-        }
-        var volumeSizeText = gettext('The volume size must be at least %(minVolumeSize)s GB');
-        var volumeSizeObj = { minVolumeSize: ctrl.minVolumeSize };
-        ctrl.volumeSizeError = interpolate(volumeSizeText, volumeSizeObj, true);
-      } else {
-        ctrl.minVolumeSize = 0;
-        ctrl.volumeSizeError = gettext('Volume size is required and must be an integer');
-      }
-    }
-
-    // Validator for boot source type. Instance count must to be 1 if volume selected
-    function validateBootSourceType() {
-      var bootSourceType = ctrl.currentBootSource;
-      var instanceCount = $scope.model.newInstanceSpec.instance_count;
-
-      /*
-       * Field is valid if boot source type is not volume, instance count is blank/undefined
-       * (this is an error with instance count) or instance count is 1
-       */
-      var isValid = bootSourceType !== bootSourceTypes.VOLUME ||
-                    !instanceCount ||
-                    instanceCount === 1;
-
-      $scope.launchInstanceSourceForm['boot-source-type']
-            .$setValidity('bootSourceType', isValid);
-    }
-
     function findSourceById(sources, id) {
       var len = sources.length;
       var source;
@@ -554,28 +409,5 @@
       }
     }
 
-    function setSourceVolumeWithId(id) {
-      var pre = findSourceById($scope.model.volumes, id);
-      if (pre) {
-        changeBootSource(bootSourceTypes.VOLUME, [pre]);
-        $scope.model.newInstanceSpec.source_type = {
-          type: bootSourceTypes.VOLUME,
-          label: gettext('Volume')
-        };
-        ctrl.currentBootSource = bootSourceTypes.VOLUME;
-      }
-    }
-
-    function setSourceSnapshotWithId(id) {
-      var pre = findSourceById($scope.model.volumeSnapshots, id);
-      if (pre) {
-        changeBootSource(bootSourceTypes.VOLUME_SNAPSHOT, [pre]);
-        $scope.model.newInstanceSpec.source_type = {
-          type: bootSourceTypes.VOLUME_SNAPSHOT,
-          label: gettext('Snapshot')
-        };
-        ctrl.currentBootSource = bootSourceTypes.VOLUME_SNAPSHOT;
-      }
-    }
   }
 })();

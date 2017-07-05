@@ -15,10 +15,12 @@
 
 import logging
 
-from django.core import urlresolvers
-from django.http import HttpResponse  # noqa
 from django import template
+from django.core import urlresolvers
+from django.core.urlresolvers import reverse
+from django.http import HttpResponse  # noqa
 from django.template.defaultfilters import title  # noqa
+from django.utils.http import urlencode
 from django.utils.translation import npgettext_lazy
 from django.utils.translation import pgettext_lazy
 from django.utils.translation import string_concat  # noqa
@@ -41,7 +43,7 @@ SNAPSHOT_READY_STATES = ("running",)
 
 
 def is_deleting(instance):
-    return get_state(instance) == "shutting-down"
+    return get_state(instance) in ("shutting-down", "terminated")
 
 
 class DeleteInstance(tables.DeleteAction):
@@ -64,13 +66,10 @@ class DeleteInstance(tables.DeleteAction):
         )
 
     def allowed(self, request, instance=None):
-        """Allow delete action if instance is in error state or not currently
-        being deleted.
-        """
-        error_state = False
         if instance:
-            error_state = (instance.status == 'ERROR')
-        return error_state or not is_deleting(instance)
+            return not is_deleting(instance)
+        else:
+            return True
 
     def action(self, request, obj_id):
         ec2.delete_instance(request, obj_id)
@@ -100,9 +99,9 @@ class RebootInstance(tables.BatchAction):
         )
 
     def allowed(self, request, instance=None):
-        if instance is not None:
-            return ((get_state(instance) in ACTIVE_STATES)
-                    and not is_deleting(instance))
+        if instance:
+            return (get_state(instance) in ACTIVE_STATES)\
+                   and not is_deleting(instance)
         else:
             return True
 
@@ -241,6 +240,51 @@ class UpdateRow(tables.Row):
         return instance
 
 
+class ExportInstance(tables.LinkAction):
+    name = "export_instance"
+    verbose_name = _("Export Instance")
+    url = "horizon:project:instances:launch"
+    classes = ("ajax-modal", "btn-launch")
+    icon = "cloud-upload"
+
+    def get_link_url(self, datum):
+        base_url = reverse(self.url)
+
+        params = urlencode({"source_type": "instance",
+                            "source_id": self.table.get_object_id(datum)})
+        return "?".join([base_url, params])
+
+    def allowed(self, request, instance=None):
+        if instance is not None:
+            return ((get_state(instance) in ACTIVE_STATES)
+                    and not is_deleting(instance))
+        else:
+            return True
+
+
+class ExportInstanceNG(ExportInstance):
+    name = "export_instance_ng"
+    verbose_name = _("Export Instance")
+    url = "horizon:project:instances:launch"
+    classes = ("btn-launch", )
+    ajax = False
+
+    def __init__(self, attrs=None, **kwargs):
+        kwargs['preempt'] = True
+        super(ExportInstance, self).__init__(attrs, **kwargs)
+
+    def get_link_url(self, datum):
+        instanceId = self.table.get_object_id(datum)
+        url = reverse(self.url)
+        ngclick = "modal.openExportInstanceWizard(" \
+            "{successUrl: '%s', instanceId: '%s'})" % (url, instanceId)
+        self.attrs.update({
+            "ng-controller": "ExportInstanceModalController as modal",
+            "ng-click": ngclick
+        })
+        return "javascript:void(0);"
+
+
 class StartInstance(tables.BatchAction):
     name = "start"
     classes = ('btn-confirm',)
@@ -262,8 +306,11 @@ class StartInstance(tables.BatchAction):
         )
 
     def allowed(self, request, instance=None):
-        return ((instance is not None) and
-                (get_state(instance) in ("stopped", )))
+        if instance:
+            return get_state(instance) in ("stopped",)\
+                   and not is_deleting(instance)
+        else:
+            return True
 
     def action(self, request, obj_id):
         ec2.start_instance(request, obj_id)
@@ -293,9 +340,11 @@ class StopInstance(tables.BatchAction):
         )
 
     def allowed(self, request, instance=None):
-        return ((instance is not None)
-                and ((get_state(instance) in ("running", ))
-                and not is_deleting(instance)))
+        if instance:
+            return get_state(instance) in ("running",)\
+                   and not is_deleting(instance)
+        else:
+            return True
 
     def action(self, request, obj_id):
         ec2.stop_instance(request, obj_id)
@@ -335,7 +384,7 @@ STATUS_CHOICES = (
 
 
 class InstancesFilterAction(tables.FilterAction):
-    filter_type = "server"
+    filter_type = "query"
     filter_choices = (('name', _("Instance Name ="), True),
                       ('status', _("Status ="), True),
                       ('image', _("Image ID ="), True),
@@ -372,6 +421,6 @@ class Ec2InstanceTable(tables.DataTable):
         verbose_name = _("EC2 Instances")
         status_columns = ["status", ]
         row_class = UpdateRow
-        table_actions_menu = (StartInstance, StopInstance)
+        table_actions_menu = (StartInstance, StopInstance, RebootInstance)
         table_actions = (LaunchLinkNG, ImportInstanceLinkNG, DeleteInstance, InstancesFilterAction)
-        row_actions = (StartInstance, StopInstance, RebootInstance, DeleteInstance)
+        row_actions = (ExportInstanceNG, StartInstance, StopInstance, RebootInstance, DeleteInstance)

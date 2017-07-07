@@ -4,6 +4,7 @@ AWS Plugin For OpenStack Horizon
 .. image:: https://img.shields.io/badge/license-Apache%202-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
+Only the 'Newton' version is supported. 'Mikata' version comming soon.
 
 AWS Plugin For Openstack Horizon
 

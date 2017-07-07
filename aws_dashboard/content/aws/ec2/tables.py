@@ -375,14 +375,6 @@ def get_launch_time(instance):
 TASK_DISPLAY_NONE = pgettext_lazy("Task status of an Instance", u"None")
 
 
-STATUS_CHOICES = (
-    ("running", True),
-    ("stopped", False),
-    ("error", False),
-    ("terminated", False),
-)
-
-
 class InstancesFilterAction(tables.FilterAction):
     filter_type = "query"
     filter_choices = (('name', _("Instance Name ="), True),
@@ -392,6 +384,12 @@ class InstancesFilterAction(tables.FilterAction):
 
 
 class Ec2InstanceTable(tables.DataTable):
+    STATUS_CHOICES = (
+        ("running", True),
+        ("stopped", False),
+        ("error", False),
+        ("terminated", False),
+    )
     name = tables.WrappingColumn("name",
                                  link="aws:ec2:instances:detail",
                                  verbose_name=_("Instance Name"))

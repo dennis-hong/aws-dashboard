@@ -44,9 +44,6 @@
             <th ng-class="ctrl.tableHeadCells[3].classList">
               {$ ctrl.tableHeadCells[3].text $}
             </th>
-            <th ng-class="ctrl.tableHeadCells[4].classList">
-              {$ ctrl.tableHeadCells[4].text $}
-            </th>
             <th class="action"></th>
           </tr>
         </thead><!-- /transfer table, allocated table head -->
@@ -79,15 +76,6 @@
             </td>
             <td ng-class="ctrl.tableBodyCells[3].classList">
               {$ ctrl.tableBodyCells[3].filter ? ctrl.tableBodyCells[3].filter(ctrl.tableBodyCells[3].filterRawData ? row : row[ctrl.tableBodyCells[3].key], ctrl.tableBodyCells[3].filterArg) : row[ctrl.tableBodyCells[3].key] $}
-            </td>
-            <td ng-class="ctrl.tableBodyCells[4].classList">
-              <span ng-if="model.newInstanceSpec.source_type.type === 'volume' && row.availability_zone !== model.newInstanceSpec.availability_zone"
-                    class="invalid fa fa-exclamation-triangle"
-                    popover="{$ ::trCtrl.helpText.volumeAZHelpText $}"
-                    popover-trigger="mouseenter mouseleave"
-                    popover-append-to-body="true"
-                    popover-placement="top"></span>
-              {$ ctrl.tableBodyCells[4].filter ? ctrl.tableBodyCells[4].filter(row[ctrl.tableBodyCells[4].key], ctrl.tableBodyCells[4].filterArg) : row[ctrl.tableBodyCells[4].key] $}
             </td>
             <td class="actions_column">
               <action-list>
@@ -141,11 +129,6 @@
                   st-sort="{$ ctrl.tableHeadCells[3].sortable && ctrl.tableBodyCells[3].key $}">
                 {$ ctrl.tableHeadCells[3].text $}
               </th>
-              <th ng-attr-st-sort-default="{$ ctrl.tableHeadCells[4].sortDefault $}"
-                  ng-class="ctrl.tableHeadCells[4].classList"
-                  st-sort="{$ ctrl.tableHeadCells[4].sortable && ctrl.tableBodyCells[4].key $}">
-                {$ ctrl.tableHeadCells[4].text $}
-              </th>
               <th class="action"></th>
             </tr>
           </thead><!-- /transfer table, available table head -->
@@ -179,15 +162,6 @@
               </td>
               <td ng-class="ctrl.tableBodyCells[3].classList">
                 {$ ctrl.tableBodyCells[3].filter ? ctrl.tableBodyCells[3].filter(ctrl.tableBodyCells[3].filterRawData ? row : row[ctrl.tableBodyCells[3].key], ctrl.tableBodyCells[3].filterArg) : row[ctrl.tableBodyCells[3].key] $}
-              </td>
-              <td ng-class="ctrl.tableBodyCells[4].classList">
-                <span ng-if="model.newInstanceSpec.source_type.type === 'volume' && row.availability_zone !== model.newInstanceSpec.availability_zone"
-                      class="invalid fa fa-exclamation-triangle"
-                      popover="{$ ::trCtrl.helpText.volumeAZHelpText $}"
-                      popover-trigger="mouseenter mouseleave"
-                      popover-append-to-body="true"
-                      popover-placement="top"></span>
-                {$ ctrl.tableBodyCells[4].filter ? ctrl.tableBodyCells[4].filter(row[ctrl.tableBodyCells[4].key], ctrl.tableBodyCells[4].filterArg) : row[ctrl.tableBodyCells[4].key] $}
               </td>
               <td class="actions_column">
                 <action-list>

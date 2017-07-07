@@ -43,5 +43,5 @@ class IndexView(tables.DataTableView):
         except ImproperlyConfigured:
             exceptions.handle(self.request, _("Not Found AWS API KEY in this project."))
         except Exception:
-            exceptions.handle(self.request, _("Uhorizon.dashboard.aws.workflow.export-instance."))
+            exceptions.handle(self.request, _("Unable to retrieve transport list."))
         return transport_tasks

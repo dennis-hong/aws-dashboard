@@ -77,6 +77,7 @@ class Image(base.APIDictWrapper):
         apidict["is_public"] = apidict["Public"]
         apidict["create_at"] = apidict["CreationDate"]
         apidict["platform"] = apidict.get("Platform")
+        apidict["architecture"] = apidict.get("Architecture")
         super(Image, self).__init__(apidict)
 
 
@@ -87,6 +88,7 @@ class InstanceType(base.APIDictWrapper):
 
     def __init__(self, apidict):
         apidict["id"] = apidict["InstanceType"]
+        apidict["name"] = apidict["InstanceType"]
         apidict["vcpus"] = apidict["vCPU"]
         apidict["ram"] = apidict["Memory"]
         apidict["storage"] = apidict["Storage"]
@@ -232,10 +234,11 @@ def list_image(request, params=[]):
             {
                 "Name": "name",
                 "Values": [
-                    "RHEL-7.2*",
+                    "RHEL-7*",
                     "suse-sles-12-*",
                     "ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*",
                     "amzn-ami-hvm-*",
+                    "Windows_Server-2016*",
                     "import*",
                     "export*",
                 ]

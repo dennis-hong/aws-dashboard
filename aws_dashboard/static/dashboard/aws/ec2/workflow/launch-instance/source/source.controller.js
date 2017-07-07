@@ -33,10 +33,7 @@
   LaunchEC2InstanceSourceController.$inject = [
     '$scope',
     'horizon.dashboard.aws.workflow.launch-instance.boot-source-types',
-    'bytesFilter',
     'dateFilter',
-    'decodeFilter',
-    'diskFormatFilter',
     'horizon.dashboard.aws.workflow.launch-instance.basePath',
     'horizon.framework.widgets.transfer-table.events',
     'horizon.framework.widgets.magic-search.events'
@@ -44,10 +41,7 @@
 
   function LaunchEC2InstanceSourceController($scope,
     bootSourceTypes,
-    bytesFilter,
     dateFilter,
-    decodeFilter,
-    diskFormatFilter,
     basePath,
     events,
     magicSearchEvents
@@ -101,58 +95,35 @@
       }
     };
 
-    var diskFormats = [
-      { label: gettext('AKI'), key: 'aki' },
-      { label: gettext('AMI'), key: 'ami' },
-      { label: gettext('ARI'), key: 'ari' },
-      { label: gettext('Docker'), key: 'docker' },
-      { label: gettext('ISO'), key: 'iso' },
-      { label: gettext('OVA'), key: 'ova' },
-      { label: gettext('QCOW2'), key: 'qcow2' },
-      { label: gettext('RAW'), key: 'raw' },
-      { label: gettext('VDI'), key: 'vdi' },
-      { label: gettext('VHD'), key: 'vhd' },
-      { label: gettext('VMDK'), key: 'vmdk' }
-    ];
-
     // Mapping for dynamic table headers
     var tableHeadCellsMap = {
       image: [
         { text: gettext('Name'), sortable: true, sortDefault: true },
         { text: gettext('CreationDate'), sortable: true },
-        { text: gettext('Public'), sortable: true },
         { text: gettext('ImageType'), sortable: true },
-        { text: gettext('Architecture'), sortable: true },
-        { text: gettext('State'), sortable: true },
+        { text: gettext('Architecture'), sortable: true }
       ],
       snapshot: [
         { text: gettext('Name'), sortable: true, sortDefault: true },
-        { text: gettext('Updated'), sortable: true },
-        { text: gettext('Size'), classList: ['number'], sortable: true },
-        { text: gettext('Type'), sortable: true },
-        { text: gettext('Visibility'), sortable: true }
+        { text: gettext('CreationDate'), sortable: true },
+        { text: gettext('ImageType'), sortable: true },
+        { text: gettext('Architecture'), sortable: true }
       ]
     };
-
-    // Map Visibility data so we can decode true/false to Public/Private
-    var _visibilitymap = { true: gettext('Public'), false: gettext('Private') };
 
     // Mapping for dynamic table data
     var tableBodyCellsMap = {
       image: [
-        { key: 'Name', classList: ['hi-light', 'word-break'] },
-        { key: 'CreationDate', filter: dateFilter, filterArg: 'short' },
-        { key: 'Public', filter: decodeFilter, filterArg: _visibilitymap },
-        { key: 'ImageType' },
-        { key: 'Architecture' },
-        { key: 'State' }
+        { key: 'name', classList: ['hi-light', 'word-break'] },
+        { key: 'create_at', filter: dateFilter, filterArg: 'short' },
+        { key: 'type' },
+        { key: 'architecture' }
       ],
       snapshot: [
         { key: 'name', classList: ['hi-light', 'word-break'] },
-        { key: 'updated_at', filter: dateFilter, filterArg: 'short' },
-        { key: 'size', filter: bytesFilter, classList: ['number'] },
-        { key: 'disk_format', filter: diskFormatFilter, filterRawData: true },
-        { key: 'is_public', filter: decodeFilter, filterArg: _visibilitymap }
+        { key: 'create_at', filter: dateFilter, filterArg: 'short' },
+        { key: 'type' },
+        { key: 'architecture' }
       ]
     };
 
@@ -163,73 +134,20 @@
 
     // All facets for source step
     var facets = {
-      created: {
-        label: gettext('Created'),
-        name: 'created_at',
-        singleton: true
-      },
-      description: {
-        label: gettext('Description'),
-        name: 'description',
-        singleton: true
-      },
       name: {
         label: gettext('Name'),
         name: 'name',
         singleton: true
-      },
-      size: {
-        label: gettext('Size'),
-        name: 'size',
-        singleton: true
-      },
-      status: {
-        label: gettext('Status'),
-        name: 'status',
-        singleton: true,
-        options: [
-          { label: gettext('Available'), key: 'available' },
-          { label: gettext('Creating'), key: 'creating' },
-          { label: gettext('Deleting'), key: 'deleting' },
-          { label: gettext('Error'), key: 'error' },
-          { label: gettext('Error Deleting'), key: 'error_deleting' }
-        ]
-      },
-      type: {
-        label: gettext('Type'),
-        name: 'disk_format',
-        singleton: true,
-        options: diskFormats
-      },
-      updated: {
-        label: gettext('Updated'),
-        name: 'updated_at',
-        singleton: true
-      },
-      visibility: {
-        label: gettext('Visibility'),
-        name: 'is_public',
-        singleton: true,
-        options: [
-          { label: gettext('Public'), key: 'true' },
-          { label: gettext('Private'), key: 'false' }
-        ]
-      },
-      volumeType: {
-        label: gettext('Type'),
-        name: 'volume_image_metadata.disk_format',
-        singleton: true,
-        options: diskFormats
       }
     };
 
     // Mapping for filter facets based on boot source type
     var sourceTypeFacets = {
       image: [
-        facets.name, facets.updated, facets.size, facets.type, facets.visibility
+        facets.name
       ],
       snapshot: [
-        facets.name, facets.updated, facets.size, facets.type, facets.visibility
+        facets.name
       ]
     };
 

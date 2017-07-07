@@ -319,7 +319,11 @@
 
     function onGetFlavors(data) {
       model.flavors.length = 0;
-      push.apply(model.flavors, data.data.items);
+      push.apply(model.flavors, data.data.items.sort(function (a, b) {
+        if(a.name > b.name) return -1;
+        if(a.name < b.name) return 1;
+        return 0;
+      }));
     }
 
     function setFinalSpecFlavor(finalSpec) {

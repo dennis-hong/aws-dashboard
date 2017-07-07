@@ -303,7 +303,11 @@
 
     function onGetFlavors(data) {
       model.flavors.length = 0;
-      push.apply(model.flavors, data.data.items);
+      push.apply(model.flavors, data.data.items.sort(function (a, b) {
+        if(a.name > b.name) return -1;
+        if(a.name < b.name) return 1;
+        return 0;
+      }));
     }
 
     function setFinalSpecFlavor(finalSpec) {
@@ -370,7 +374,7 @@
       var enabledSnapshot = allEnabled || !config.disable_instance_snapshot;
 
       if (enabledImage || enabledSnapshot) {
-        return ec2API.getImages({State: 'available'}).then(function getEnabledImages(data) {
+        return ec2API.getImages().then(function getEnabledImages(data) {
           if (enabledImage) {
             onGetImages(data);
           }
@@ -390,8 +394,10 @@
 
     function onGetImages(data) {
       model.images.length = 0;
-      push.apply(model.images, data.data.items.filter(function (image) {
-        return true
+      push.apply(model.images, data.data.items.sort(function (a, b) {
+        if(a.name > b.name) return -1;
+        if(a.name < b.name) return 1;
+        return 0;
       }));
       addAllowedBootSource(model.images, bootSourceTypes.IMAGE, gettext('Image'));
     }

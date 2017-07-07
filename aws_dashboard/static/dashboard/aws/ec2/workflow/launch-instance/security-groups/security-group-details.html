@@ -9,10 +9,10 @@
   </thead>
   <tbody>
     <tr ng-repeat="d in row.security_group_rules">
-      <td>{$ d.IpProtocol | noValue $}</td>
-      <td>{$ d.FromPort | noValue $}</td>
-      <td>{$ d.ToPort | noValue $}</td>
-      <td>{$ d.IpRanges | noValue $}</td>
+      <td>{$ d.ip_protocol | noValue $}</td>
+      <td>{$ d.from_port | noValue $}</td>
+      <td>{$ d.to_port | noValue $}</td>
+      <td>{$ d.ip_ranges | noValue $}</td>
     </tr>
   </tbody>
 </table>

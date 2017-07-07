@@ -66,7 +66,7 @@ class LaunchImageNG(LaunchImage):
         imageId = self.table.get_object_id(datum)
         url = reverse(self.url)
         ngclick = "modal.openLaunchEC2InstanceWizard(" \
-            "{successUrl: '%s', source_type: 'image', source_id: '%s'})" % (url, imageId)
+            "{successUrl: '%s', source_type: 'image', imageId: '%s'})" % (url, imageId)
         self.attrs.update({
             "ng-controller": "LaunchEC2InstanceModalController as modal",
             "ng-click": ngclick

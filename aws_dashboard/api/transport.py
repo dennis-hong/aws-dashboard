@@ -79,4 +79,3 @@ def cancel_export_task(request, task_id):
 
 def cancel_import_task(request, task_id):
     ec2_client(request).cancel_import_task(ImportTaskIds=[task_id])
-

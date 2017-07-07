@@ -162,7 +162,7 @@ class Images(generic.View):
     @rest_utils.ajax()
     def get(self, request):
         """Get EC2 image list"""
-        images = ec2.get_images(request)
+        images = ec2.list_image(request)
         return {
             "items": [i.to_dict() for i in images],
             "has_more_data": False,

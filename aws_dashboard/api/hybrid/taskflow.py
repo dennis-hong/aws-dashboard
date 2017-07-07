@@ -16,9 +16,6 @@ import time
 
 from django.conf import settings
 
-from openstack_dashboard.api import glance
-from aws_dashboard.api import ec2
-
 from aws_dashboard.api.hybrid import utils
 import aws_dashboard.api.hybrid.import_instance_tasks as import_task
 import aws_dashboard.api.hybrid.export_instance_tasks as export_task
@@ -36,10 +33,8 @@ def run_import_instance_tasks(request, source_type, source_id, flavor, key_name,
     """Import instance task flow"""
     start_time = time.time()
     LOG.debug("Start Import Instance. Receive Data : {}".format(request.DATA))
-    if source_type == "instance":
-        image = import_task.create_snapshot(request, source_id, STATUS_CHECK_INTERVAL)
-    else:
-        image = glance.image_get(request, source_id)
+
+    image = import_task.create_snapshot(request, source_id, STATUS_CHECK_INTERVAL)
 
     file_path = import_task.download_image(request, image, IMAGE_TASK_WORKING_PATH)
     new_file_path = import_task.convert_image_format(file_path, CONVERT_IMAGE_FORMAT)

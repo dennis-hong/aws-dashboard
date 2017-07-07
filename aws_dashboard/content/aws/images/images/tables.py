@@ -182,6 +182,8 @@ class ImagesTable(tables.DataTable):
                                  # TODO TBD
                                  # link="horizon:aws:images:images:detail",
                                  verbose_name=_("Image Name"),)
+    image_id = tables.Column("id",
+                             verbose_name=_("Image ID"))
     image_type = tables.Column(get_image_type,
                                verbose_name=_("Type"),
                                display_choices=TYPE_CHOICES)

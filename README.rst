@@ -4,6 +4,7 @@ AWS Plugin For OpenStack Horizon
 .. image:: https://img.shields.io/badge/license-Apache%202-blue.svg
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
+Only the 'Newton' version is supported. 'Mikata' version comming soon.
 
 AWS Plugin For Openstack Horizon
 
@@ -32,8 +33,7 @@ How To Install
 4. Go back into the horizon repository and collect your static files::
 
     cd ../horizon
-    python manage.py collectstatic --noinput
-    python manage.py compress --force
+    python manage.py collectstatic --noinput && python manage.py compress --force
 
 4. Restart your horizon and check plugin::
 
@@ -99,8 +99,10 @@ How To Uninstall
     rm openstack_dashboard/local/enabled/_30000_aws_dashboard.py
     rm openstack_dashboard/local/enabled/_31000_aws_compute_panel_group.py
     rm openstack_dashboard/local/enabled/_31100_aws_compute_ec2_panel.py
+    rm openstack_dashboard/local/enabled/_31120_aws_compute_access_and_security_panel.py
+    rm openstack_dashboard/local/enabled/_31110_aws_compute_images_panel.py
+    rm openstack_dashboard/local/enabled/_31200_aws_compute_transport_panel.py
     rm openstack_dashboard/local/local_settings.d/_30000_aws_dashboard.py
-    python manage.py collectstatic --noinput
-    python manage.py compress --force
+    python manage.py collectstatic --noinput && python manage.py compress --force
     sudo service apache2 restart
 

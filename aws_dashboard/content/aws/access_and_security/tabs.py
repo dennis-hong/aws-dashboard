@@ -16,7 +16,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
@@ -39,10 +39,12 @@ class SecurityGroupsTab(tabs.TableTab):
     template_name = "horizon/common/_detail_table.html"
 
     def get_security_groups_data(self):
+        security_groups = []
         try:
             security_groups = ec2.list_security_groups(self.request)
+        except ImproperlyConfigured:
+            exceptions.handle(self.request, _("Not Found AWS API KEY in this project."))
         except Exception:
-            security_groups = []
             exceptions.handle(self.request,
                               _('Unable to retrieve security groups.'))
         return sorted(security_groups, key=lambda group: group.name)

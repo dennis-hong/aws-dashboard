@@ -26,6 +26,7 @@ SUPPORT_IMAGE_FORMATS = ["qcow2", "vmdk", "raw"]
 
 @memoized
 def get_api_keys(project_id):
+    """Get AWS API key set in local settings"""
     keys_dict = getattr(settings, "AWS_API_KEY_DICT", {})
     key_set = keys_dict.get(project_id)
     _validate_key_set(key_set)
@@ -33,6 +34,7 @@ def get_api_keys(project_id):
 
 
 def _validate_key_set(key_set):
+    """Validate AWS API key set"""
     error_msg = """AWS API Key Not Found. Please Check in
                    local/local_settings.d/_30000_aws_dashboard.py"""
 
@@ -51,6 +53,7 @@ def _validate_key_set(key_set):
 
 
 def validate_image_format(file_path):
+    """Validate Image Format"""
     file_extension = os.path.splitext(file_path)[1][1:]
     if file_extension not in SUPPORT_IMAGE_FORMATS:
         raise BaseException("{} file not support format({})"

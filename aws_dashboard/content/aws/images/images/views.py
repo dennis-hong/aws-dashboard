@@ -19,6 +19,7 @@
 """
 Views for managing images.
 """
+from aws_dashboard.api.utils import ImproperlyConfigured
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.urlresolvers import reverse_lazy
@@ -111,6 +112,8 @@ class DetailView(tabs.TabView):
     def get_data(self):
         try:
             return ec2.get_image(self.request, self.kwargs['image_id'])
+        except ImproperlyConfigured:
+            exceptions.handle(self.request, _("Not Found AWS API KEY in this project."))
         except Exception:
             exceptions.handle(self.request,
                               _('Unable to retrieve image details.'),

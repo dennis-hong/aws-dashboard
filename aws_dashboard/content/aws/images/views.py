@@ -20,7 +20,7 @@
 """
 Views for managing Images and Snapshots.
 """
-
+from django.core.exceptions import ImproperlyConfigured
 from django.utils.translation import ugettext_lazy as _
 from django.views import generic
 
@@ -50,6 +50,8 @@ class IndexView(tables.DataTableView):
     def get_data(self):
         try:
             images = ec2.list_image(self.request)
+        except ImproperlyConfigured:
+            exceptions.handle(self.request, _("Not Found AWS API KEY in this project."))
         except Exception:
             images = []
             self._prev = self._more = False

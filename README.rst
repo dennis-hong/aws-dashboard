@@ -5,7 +5,7 @@ AWS Plugin For OpenStack Horizon
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
 
-Only the 'Newton' version is supported. 'Mikata' version comming soon.
+Only the 'Newton' version is supported. 'Mitaka' version comming soon.
 
 AWS Plugin For Openstack Horizon
 
@@ -13,6 +13,8 @@ AWS Plugin For Openstack Horizon
 
 How To Install
 --------------
+
+Youtube Link : https://youtu.be/gEXULxQbzIg
 
 1. Clone this repository::
 
@@ -106,4 +108,6 @@ How To Uninstall
     rm openstack_dashboard/local/local_settings.d/_30000_aws_dashboard.py*
     python manage.py collectstatic --noinput && python manage.py compress --force
     sudo service apache2 restart
+    cd ..
+    sudo rm -rf aws-dashboard/
 

@@ -9,7 +9,7 @@ Only the 'Newton' version is supported. 'Mitaka' version comming soon.
 
 AWS Plugin For Openstack Horizon
 
-.. image:: https://user-images.githubusercontent.com/23111859/28068681-89e1b87e-6681-11e7-8b11-16a0075a2b18.png
+.. image:: https://user-images.githubusercontent.com/23111859/28068764-de5f3426-6681-11e7-80d3-04fc118aef74.png
 
 How To Install
 --------------

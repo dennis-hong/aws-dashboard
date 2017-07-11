@@ -66,8 +66,8 @@ Add just one line in your local.conf::
 
     enable_plugin aws-dashboard https://github.com/dennis-hong/aws-dashboard.git stable/newton
 
-Additional Settings
--------------------
+AWS API Key Permission
+----------------------
 1. Requires AWS API Key permission
 
     1) Go to(AWS IAM Menu) : https://console.aws.amazon.com/iam/home
@@ -79,13 +79,23 @@ Additional Settings
 
  - DOC : http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
 
-2. Installing qemu-utils package is required for image conversion.(qemu-img convert)::
+Additional Settings(For Import/Export Instance)
+-----------------------------------------------
+
+If you want to test the instance import/export function...
+
+1. Installing qemu-utils package is required for image conversion.(qemu-img convert)::
 
     sudo apt-get install -y qemu-utils
     OR
     sudo yum install -y qemu-img
 
  - DOC : http://docs.aws.amazon.com/vm-import/latest/userguide/how-vm-import-export-works.html
+
+2. The instance import function will be separated into separate modules.
+   In the meantime, you need to increase the Apache timeout setting.
+
+    ex) /etc/apache2/apache2.conf -> Timeout 21600
 
 3. (Optional) Nova-compute's 'injected_network_template' setting is required
    to revert the interface settings that AWS modified when importing instances.

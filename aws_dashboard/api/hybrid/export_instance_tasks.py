@@ -115,3 +115,15 @@ def delete_glance_image(request, image_id):
     """Delete Glance Image"""
     LOG.debug('Delete Glance Image : %s' % image_id)
     return glance.image_delete(request, image_id)
+
+
+def wait_instance_active(request, instance_id, interval):
+    """Wait Instance Active"""
+    while True:
+        instance = nova.server_get(request, instance_id)
+        LOG.debug("Instance Status : {}".format(instance.status))
+        if instance.status == "ACTIVE":
+            break
+        sleep(interval)
+    LOG.debug("Instance Create Complete")
+    return instance

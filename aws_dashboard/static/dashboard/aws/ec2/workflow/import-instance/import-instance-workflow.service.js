@@ -38,13 +38,6 @@
           formName: 'importInstanceSourceForm'
         },
         {
-          id: 'details',
-          title: gettext('Details'),
-          templateUrl: basePath + 'details/details.html',
-          helpUrl: basePath + 'details/details.help.html',
-          formName: 'importInstanceDetailsForm'
-        },
-        {
           id: 'flavor',
           title: gettext('Flavor'),
           templateUrl: basePath + 'flavor/flavor.html',

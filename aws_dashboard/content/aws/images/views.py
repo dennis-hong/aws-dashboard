@@ -48,6 +48,7 @@ class IndexView(tables.DataTableView):
         return getattr(self, "_more", False)
 
     def get_data(self):
+        images = []
         try:
             images = ec2.list_image(self.request)
         except ImproperlyConfigured:

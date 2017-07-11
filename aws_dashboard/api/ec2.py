@@ -185,12 +185,10 @@ def list_instance(request):
 
 
 def get_instance(request, instance_id):
-    # TODO: change to use ec2_resource(request)
     reservations = ec2_client(request).describe_instances(
         InstanceIds=[instance_id]
     ).get("Reservations")
-    instances = _to_instances(reservations)
-    return instances[0]
+    return _to_instances(reservations)[0]
 
 
 def delete_instance(request, instance_id):
@@ -292,22 +290,26 @@ def import_openstack_sg(request, openstack_sg_id):
 
     for rule in openstack_sg.rules:
         try:
+            LOG.debug("start rule : {}".format(rule))
             kwargs = {
-                "IpProtocol": rule.get("ip_protocol"),
+                "IpProtocol": rule.get("ip_protocol") if rule.get("ip_protocol") else "tcp",
                 "FromPort": rule.get("from_port") if rule.get("from_port") else -1,
                 "ToPort": rule.get("to_port") if rule.get("to_port") else -1
             }
             if rule.get("ethertype") == "IPv4":
-                kwargs["CidrIp"] = rule.get("ip_range", {}).get("cidr", "0.0.0.0/0")
-            if rule.get("ethertype") == "IPv6":
-                # TODO : IPv6 format support
-                break
-            if rule.get("direction") == "ingress":
-                LOG.debug("Add ingress rule : {}".format(kwargs))
-                ec2_sg.authorize_ingress(**kwargs)
-            elif rule.get("direction") == "egress":
-                LOG.debug("Add egress rule : {}".format(kwargs))
-                ec2_sg.authorize_egress(**kwargs)
+                kwargs["CidrIp"] = str(rule.get("ip_range", {}).get("cidr", "0.0.0.0/0"))
+
+                if rule.get("direction") == "ingress":
+                    LOG.debug("Add ingress rule : {}".format(kwargs))
+                    ec2_sg.authorize_ingress(**kwargs)
+                elif rule.get("direction") == "egress":
+                    LOG.debug("Add egress rule : {}".format(kwargs))
+                    ec2_sg.authorize_egress(**kwargs)
+
+            elif rule.get("ethertype") == "IPv6":
+                # EC2 IPv6 format support
+                LOG.debug("IPv6 format not support : {}".format(rule))
+
         except BaseException as e:
             LOG.error("Import Fail. Cause : {} Rule format something wrong : {}"
                       .format(e, rule))

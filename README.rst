@@ -5,14 +5,16 @@ AWS Plugin For OpenStack Horizon
     :target: https://raw.githubusercontent.com/dennis-hong/aws-dashboard/master/LICENSE
 On Developing... !! Experimental Project !!
 
-Only the 'Newton' version is supported. 'Mikata' version comming soon.
+Only the 'Newton' version is supported. 'Mitaka' version comming soon.
 
 AWS Plugin For Openstack Horizon
 
-.. image:: https://cloud.githubusercontent.com/assets/23111859/26439340/af7acc86-4162-11e7-89de-48ef89451987.png
+.. image:: https://user-images.githubusercontent.com/23111859/28068764-de5f3426-6681-11e7-80d3-04fc118aef74.png
 
 How To Install
 --------------
+
+Youtube Link : https://youtu.be/gEXULxQbzIg
 
 1. Clone this repository::
 
@@ -64,8 +66,8 @@ Add just one line in your local.conf::
 
     enable_plugin aws-dashboard https://github.com/dennis-hong/aws-dashboard.git stable/newton
 
-Additional Settings
--------------------
+AWS API Key Permission
+----------------------
 1. Requires AWS API Key permission
 
     1) Go to(AWS IAM Menu) : https://console.aws.amazon.com/iam/home
@@ -77,13 +79,23 @@ Additional Settings
 
  - DOC : http://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html
 
-2. Installing qemu-utils package is required for image conversion.(qemu-img convert)::
+Additional Settings(For Import/Export Instance)
+-----------------------------------------------
+
+If you want to test the instance import/export function...
+
+1. Installing qemu-utils package is required for image conversion.(qemu-img convert)::
 
     sudo apt-get install -y qemu-utils
     OR
     sudo yum install -y qemu-img
 
  - DOC : http://docs.aws.amazon.com/vm-import/latest/userguide/how-vm-import-export-works.html
+
+2. The instance import function will be separated into separate modules.
+   In the meantime, you need to increase the Apache timeout setting.
+
+    ex) /etc/apache2/apache2.conf -> Timeout 21600
 
 3. (Optional) Nova-compute's 'injected_network_template' setting is required
    to revert the interface settings that AWS modified when importing instances.
@@ -106,4 +118,6 @@ How To Uninstall
     rm openstack_dashboard/local/local_settings.d/_30000_aws_dashboard.py*
     python manage.py collectstatic --noinput && python manage.py compress --force
     sudo service apache2 restart
+    cd ..
+    sudo rm -rf aws-dashboard/
 

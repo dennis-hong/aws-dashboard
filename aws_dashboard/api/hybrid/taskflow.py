@@ -96,6 +96,8 @@ def run_export_instance_tasks(request, name, source_id, flavor, key_name, user_d
         scheduler_hints=scheduler_hints
     )
 
+    export_task.wait_instance_active(request, new_instance.id, STATUS_CHECK_INTERVAL)
+
     export_task.delete_s3_object(request, obj_name)
     if not leave_original_instance:
         export_task.delete_instance(request, source_id)
